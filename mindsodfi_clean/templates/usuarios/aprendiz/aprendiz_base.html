@@ -1,0 +1,38 @@
+{% extends "usuarios/base.html" %}
+
+{% block content %}
+<div class="d-flex flex-grow-1">
+  <!-- Barra lateral -->
+  <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
+    <a href="{% url 'dashboard_aprendiz' %}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+      <i class="bi bi-mortarboard-fill me-2"></i>
+      <span class="fs-4">Portal Aprendiz</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">      <li><a href="{% url 'programa_aprendiz' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'programa_aprendiz' %}active{% endif %}"><i class="bi bi-journal-text me-2"></i> 📘 Mi Programa</a></li>
+      <li><a href="{% url 'ficha_aprendiz' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'ficha_aprendiz' %}active{% endif %}"><i class="bi bi-card-heading me-2"></i> 📝 Mi Ficha</a></li>
+      <li><a href="{% url 'horario_aprendiz' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'horario_aprendiz' %}active{% endif %}"><i class="bi bi-calendar3 me-2"></i> 📅 Mi Horario</a></li>
+      <li><a href="{% url 'calificaciones_aprendiz' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'calificaciones_aprendiz' %}active{% endif %}"><i class="bi bi-patch-check-fill me-2"></i> 💯 Mis Calificaciones</a></li>
+      <li><a href="{% url 'instructores_aprendiz' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'instructores_aprendiz' %}active{% endif %}"><i class="bi bi-person-video3 me-2"></i> 👨‍🏫 Mis Instructores</a></li>
+      <li><a href="{% url 'cursos_aprendiz' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'cursos_aprendiz' %}active{% endif %}"><i class="bi bi-book-half me-2"></i> 📚 Mis Cursos</a></li>
+      <li><a href="{% url 'noticias_aprendiz' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'noticias_aprendiz' %}active{% endif %}"><i class="bi bi-newspaper me-2"></i> 📰 Noticias y Anuncios</a></li>
+      <li><a href="{% url 'soporte_aprendiz' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'soporte_aprendiz' %}active{% endif %}"><i class="bi bi-question-circle-fill me-2"></i> ❓ Soporte y Ayuda</a></li>
+    </ul>
+    <hr>
+    <div class="dropdown">
+      <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-person-circle fs-4 me-2"></i>
+        <strong>{{ user.username }}</strong>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+        <li><a class="dropdown-item" href="{% url 'logout' %}">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Área de contenido principal -->
+  <div class="flex-grow-1 p-4" style="background-color: #f8f9fa;">
+    {% block aprendiz_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}
