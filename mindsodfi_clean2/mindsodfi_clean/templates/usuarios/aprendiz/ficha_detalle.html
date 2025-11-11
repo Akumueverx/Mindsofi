@@ -1,0 +1,107 @@
+{% extends "usuarios/aprendiz/aprendiz_base.html" %}
+{% block title %}Detalles de mi Ficha{% endblock %}
+
+{% block aprendiz_content %}
+<style>
+  .detalle-section {
+    background-color: #ffffff;
+    border: 2px solid #39A900;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .detalle-header {
+    background-color: #39A900;
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+  }
+  .info-item {
+    margin-bottom: 10px;
+  }
+  .info-item strong {
+    color: #39A900;
+  }
+  .competencia-item {
+    background-color: #f0f9f0;
+    border: 1px solid #39A900;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  .horario-item {
+    background-color: #ffffff;
+    border: 1px solid #39A900;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  .contacto-card {
+    background-color: #f0f9f0;
+    border: 2px solid #39A900;
+    border-radius: 8px;
+    padding: 15px;
+  }
+  hr {
+    border-color: #39A900;
+  }
+</style>
+
+<div class="container-fluid">
+  <h2 class="text-center mb-4" style="color: #39A900;">Detalles de mi Ficha</h2>
+
+  {% if ficha %}
+  <div class="row">
+    <div class="col-md-8">
+      <div class="detalle-section">
+        <div class="detalle-header">
+          <h4 class="mb-0">Información General</h4>
+        </div>
+        <div class="info-item"><strong>Número de Ficha:</strong> {{ ficha.numero }}</div>
+        <div class="info-item"><strong>Programa:</strong> {{ ficha.programa_nombre }}</div>
+        <div class="info-item"><strong>Jornada:</strong> {{ ficha.jornada }}</div>
+        <div class="info-item"><strong>Fecha de Inicio:</strong> {{ ficha.fecha_inicio }}</div>
+        <div class="info-item"><strong>Fecha de Finalización:</strong> {{ ficha.fecha_fin }}</div>
+        <div class="info-item"><strong>Número de Aprendices:</strong> {{ ficha.aprendices_count }}</div>
+        <div class="info-item"><strong>Instructor Líder:</strong> {{ ficha.instructor_lider }}</div>
+        <div class="info-item"><strong>Ubicación:</strong> {{ ficha.ubicacion }}</div>
+        <hr>
+        <div class="info-item"><strong>Descripción:</strong> {{ ficha.descripcion }}</div>
+      </div>
+
+      <div class="detalle-section">
+        <div class="detalle-header">
+          <h4 class="mb-0">Competencias del Programa</h4>
+        </div>
+        {% for competencia in ficha.competencias %}
+        <div class="competencia-item">
+          <i class="bi bi-check-circle-fill text-success me-2"></i>{{ competencia }}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="detalle-section">
+        <div class="detalle-header">
+          <h4 class="mb-0">Horario de Clases</h4>
+        </div>
+        {% for horario in ficha.horarios %}
+        <div class="horario-item">
+          <strong>{{ horario.dia }}:</strong> {{ horario.hora }} - {{ horario.competencia }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="contacto-card">
+        <h5 class="text-center mb-3" style="color: #39A900;">Información de Contacto</h5>
+        <div class="info-item"><strong>Teléfono:</strong> {{ ficha.contacto.telefono }}</div>
+        <div class="info-item"><strong>Email:</strong> {{ ficha.contacto.email }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

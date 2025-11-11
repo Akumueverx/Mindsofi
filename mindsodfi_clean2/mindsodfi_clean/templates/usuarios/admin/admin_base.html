@@ -1,0 +1,81 @@
+{% extends "usuarios/base.html" %}
+
+{% block extra_css %}
+<style>
+  .sidebar-admin {
+    background-color: #39A900 !important; /* Verde SENA */
+    color: #ffffff; /* Texto blanco por defecto para el panel */
+  }
+  .sidebar-admin .nav-link {
+    color: rgba(255, 255, 255, 0.8); /* Texto de enlaces blanco semi-transparente */
+  }
+  .sidebar-admin .nav-link:hover,
+  .sidebar-admin .dropdown-toggle:hover {
+    color: #ffffff; /* Texto blanco al pasar el mouse */
+    background-color: rgba(0, 0, 0, 0.15); /* Sutil overlay negro al pasar el mouse */
+  }
+  .sidebar-admin .nav-link.active {
+    color: #212529; /* Texto negro para el enlace activo */
+    background-color: #07b449ff; /* Fondo blanco */
+    font-weight: 500;
+  }
+  .sidebar-admin .dropdown-menu {
+    border: 1px solid rgba(0,0,0,.1);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-grow-1">
+  <!-- Barra lateral -->
+  <div class="d-flex flex-column flex-shrink-0 p-3 sidebar-admin" style="width: 280px;">
+    <a href="{% url 'dashboard_admin' %}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+      <i class="bi bi-shield-lock-fill me-2"></i>
+      <span class="fs-4">Panel Admin</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a href="/admin/" class="nav-link" target="_blank">
+          <i class="bi bi-box-arrow-up-right me-2"></i> ⚙️ Gestionar Sitio
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_usuarios' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_usuarios' %}active{% endif %}">
+          <i class="bi bi-people-fill me-2"></i> 👥 Gestión de Usuarios
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_programas' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_programas' %}active{% endif %}">
+          <i class="bi bi-journal-album me-2"></i> 📘 Gestión de Programas
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_fichas' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_fichas' %}active{% endif %}">
+          <i class="bi bi-card-list me-2"></i> 📝 Gestión de Fichas
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_reportes' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_reportes' %}active{% endif %}">
+          <i class="bi bi-graph-up me-2"></i> 📊 Reportes Generales
+        </a>
+      </li>
+    </ul>
+    <hr>
+    <div class="dropdown">
+      <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle p-2 rounded-2" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-person-circle fs-4 me-2"></i>
+        <strong>{{ user.username }}</strong>
+      </a>
+      <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser1">
+        <li><a class="dropdown-item" href="{% url 'logout' %}">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Área de contenido principal -->
+  <div class="flex-grow-1 p-4" style="background-color: #fbfffdff;">
+    {% block admin_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}
