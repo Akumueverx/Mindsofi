@@ -1,2 +1,3 @@
 # Mindsofi
 
+#Antiguo codigo
