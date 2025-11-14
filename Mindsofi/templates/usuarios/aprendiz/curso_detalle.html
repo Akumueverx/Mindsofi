@@ -1,0 +1,106 @@
+{% extends "usuarios/aprendiz/aprendiz_base.html" %}
+{% block title %}Detalles del Curso{% endblock %}
+
+{% block aprendiz_content %}
+<style>
+  .detalle-section {
+    background-color: #ffffff;
+    border: 2px solid #39A900;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .detalle-header {
+    background-color: #39A900;
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+  .info-item {
+    margin-bottom: 10px;
+  }
+  .info-item strong {
+    color: #39A900;
+  }
+  .objetivo-item {
+    background-color: #f0f9f0;
+    border: 1px solid #39A900;
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    display: inline-block;
+    margin-right: 8px;
+  }
+  .progreso-card {
+    background-color: #f0f9f0;
+    border: 2px solid #39A900;
+    border-radius: 12px;
+    padding: 15px;
+  }
+  .progress {
+    background-color: #e9ecef;
+    border-radius: 4px;
+  }
+  .progress-bar {
+    background-color: #39A900 !important;
+  }
+  .badge-en-curso {
+    background-color: #39A900 !important;
+    color: #ffffff;
+  }
+  .badge-completado {
+    background-color: #28a745 !important;
+    color: #ffffff;
+  }
+  .badge-otro {
+    background-color: #6c757d !important;
+    color: #ffffff;
+  }
+</style>
+
+<div class="container-fluid">
+  <h2 class="text-center mb-4" style="color: #39A900;">Detalles del Curso Complementario</h2>
+
+  {% if curso %}
+  <div class="row">
+    <div class="col-md-8">
+      <div class="detalle-section">
+        <div class="detalle-header">
+          <h4 class="mb-0">Información General</h4>
+        </div>
+        <div class="info-item"><strong>Nombre del Curso:</strong> {{ curso.nombre }}</div>
+        <div class="info-item"><strong>Estado:</strong> <span class="badge {% if curso.estado == 'Completado' %}badge-completado{% elif curso.estado == 'En curso' %}badge-en-curso{% else %}badge-otro{% endif %}">{{ curso.estado }}</span></div>
+        <div class="info-item"><strong>Descripción:</strong> {{ curso.descripcion }}</div>
+        <div class="info-item"><strong>Instructor:</strong> {{ curso.instructor }}</div>
+        <div class="info-item"><strong>Horario:</strong> {{ curso.horario }}</div>
+        <div class="info-item"><strong>Duración:</strong> {{ curso.duracion }}</div>
+        <div class="info-item"><strong>Requisitos:</strong> {{ curso.requisitos }}</div>
+      </div>
+
+      <div class="detalle-section">
+        <div class="detalle-header">
+          <h4 class="mb-0">Objetivos del Curso</h4>
+        </div>
+        {% for objetivo in curso.objetivos %}
+        <span class="objetivo-item">{{ objetivo }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="progreso-card">
+        <h5 class="text-center mb-3" style="color: #39A900;">Progreso del Curso</h5>
+        <div class="text-center mb-3">
+          <span class="badge badge-en-curso">{{ curso.progreso }}% Completado</span>
+        </div>
+        <div class="progress" style="height: 20px;">
+          <div class="progress-bar" role="progressbar" style="width: {{ curso.progreso }}%;" aria-valuenow="{{ curso.progreso }}" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
