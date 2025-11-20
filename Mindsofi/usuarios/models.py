@@ -15,3 +15,21 @@ class Usuario(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+#--Modelos para Admin --
+
+class Programa(models.Model):
+    NIVELES = [
+        ('tecnologo', 'Tecnólogo'),
+        ('tecnico', 'Técnico'),
+    ]
+    
+    nombre = models.CharField(max_length=200)
+    codigo = models.CharField(max_length=20, unique=True)
+    nivel = models.CharField(max_length=20, choices=NIVELES)
+    duracion_meses = models.IntegerField()
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.nombre

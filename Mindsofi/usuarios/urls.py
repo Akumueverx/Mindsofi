@@ -46,4 +46,8 @@ urlpatterns = [
     path("dashboard/admin/usuarios/<int:usuario_id>/editar/", views.admin_usuario_editar_view, name="admin_usuario_editar"),
     path("dashboard/admin/programas/<int:programa_id>/editar/", views.admin_programa_editar_view, name="admin_programa_editar"),
     path("dashboard/admin/fichas/<int:ficha_id>/editar/", views.admin_ficha_editar_view, name="admin_ficha_editar"),
+
+    # Urls botones admin
+    path('usuarios/crear/', views.crear_usuario, name='crear_usuario'),
+    path('programas/crear/', views.crear_programa, name='crear_programa'),
 ]
