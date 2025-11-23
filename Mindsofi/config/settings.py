@@ -46,8 +46,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mindsofi',         # El nombre de la BD que creaste en el paso 2
+        'USER': 'root',             # El usuario que creaste (o 'root' si no creaste uno)
+        'PASSWORD': '123456', # La contraseña de ese usuario
+        'HOST': 'localhost',                # O '127.0.0.1'. Si tu BD está en otro servidor, pon la IP o dominio.
+        'PORT': '3306',                     # El puerto estándar de MySQL. Déjalo así si no lo has cambiado.
+        
+        'OPTIONS': {
+            'sql_mode': 'TRADITIONAL',
+        }
     }
 }
 
