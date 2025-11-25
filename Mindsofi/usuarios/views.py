@@ -3,8 +3,8 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from .forms import UsuarioCreationForm, CustomAuthenticationForm
-from .models import Usuario
+from .forms import UsuarioCreationForm, CustomAuthenticationForm, FichaForm
+from .models import Usuario, Ficha, Programa
 from .decorators import role_required
 
 # Constante para los ambientes del mapa para reducir la duplicación de código
@@ -331,16 +331,52 @@ def admin_programas_view(request):
 @login_required
 @role_required(allowed_roles=['administrativo'])
 def admin_fichas_view(request):
-    # TODO: Obtener fichas reales de la BD
-    fichas_ejemplo = [
-        {'id': 1, 'numero': '2556678', 'programa': 'Análisis y Desarrollo de Software', 'jornada': 'Diurna', 'aprendices_count': 30},
-        {'id': 2, 'numero': '2558341', 'programa': 'Producción Multimedia', 'jornada': 'Nocturna', 'aprendices_count': 25},
-        {'id': 3, 'numero': '2559123', 'programa': 'Sistemas', 'jornada': 'Diurna', 'aprendices_count': 35},
-    ]
+    nivel_filtro = request.GET.get('nivel')
+    
+    fichas_qs = Ficha.objects.select_related('programa').all()
+
+    if nivel_filtro and nivel_filtro != 'todos':
+        fichas_qs = fichas_qs.filter(programa__nivel=nivel_filtro)
+
+    # Obtenemos los niveles disponibles para los botones de filtro
+    niveles_disponibles = Programa.objects.values_list('nivel', flat=True).distinct()
+
     context = {
-        'fichas': fichas_ejemplo
+        'fichas': fichas_qs,
+        'niveles': [n for n in niveles_disponibles if n], # Filtramos nulos o vacíos
+        'filtro_actual': nivel_filtro
     }
     return render(request, 'usuarios/admin/admin_fichas.html', context)
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_ficha_crear_view(request):
+    if request.method == 'POST':
+        form = FichaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Ficha creada exitosamente.')
+            return redirect('admin_fichas')
+    else:
+        form = FichaForm()
+    
+    context = {
+        'form': form,
+        'titulo': 'Crear Nueva Ficha'
+    }
+    return render(request, 'usuarios/admin/admin_ficha_form.html', context)
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_ficha_eliminar_view(request, ficha_id):
+    ficha = Ficha.objects.get(id=ficha_id)
+    if request.method == 'POST':
+        ficha.delete()
+        messages.success(request, f"Ficha #{ficha.numero} eliminada correctamente.")
+        return redirect('admin_fichas')
+    
+    # Si no es POST, puedes mostrar una página de confirmación (opcional)
+    return redirect('admin_fichas')
 
 @login_required
 @role_required(allowed_roles=['administrativo'])
@@ -407,30 +443,21 @@ def admin_programa_editar_view(request, programa_id):
 @login_required
 @role_required(allowed_roles=['administrativo'])
 def admin_ficha_editar_view(request, ficha_id):
-    # TODO: Obtener ficha y programas reales de la BD
-    fichas_ejemplo = [
-        {'id': 1, 'numero': '2556678', 'programa': 'Análisis y Desarrollo de Software', 'jornada': 'Diurna', 'aprendices_count': 30},
-        {'id': 2, 'numero': '2558341', 'programa': 'Producción Multimedia', 'jornada': 'Nocturna', 'aprendices_count': 25},
-        {'id': 3, 'numero': '2559123', 'programa': 'Sistemas', 'jornada': 'Diurna', 'aprendices_count': 35},
-    ]
-    programas_ejemplo = [
-        {'id': 1, 'nombre': 'Análisis y Desarrollo de Software'},
-        {'id': 2, 'nombre': 'Producción Multimedia'},
-        {'id': 3, 'nombre': 'Sistemas'},
-    ]
-    ficha = next((f for f in fichas_ejemplo if f['id'] == ficha_id), None)
-
+    ficha = Ficha.objects.get(id=ficha_id)
     if request.method == 'POST':
-        # TODO: Lógica para actualizar la ficha en la BD
-        messages.success(request, f"Ficha #{ficha['numero']} actualizada correctamente.")
-        return redirect('admin_fichas')
+        form = FichaForm(request.POST, instance=ficha)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Ficha #{ficha.numero} actualizada correctamente.")
+            return redirect('admin_fichas')
+    else:
+        form = FichaForm(instance=ficha)
 
     context = {
-        'ficha': ficha,
-        'programas': programas_ejemplo,
-        'jornadas': ['Diurna', 'Nocturna', 'Mixta', 'Fines de semana']
+        'form': form,
+        'titulo': f'Editar Ficha #{ficha.numero}'
     }
-    return render(request, 'usuarios/admin/admin_ficha_editar.html', context)
+    return render(request, 'usuarios/admin/admin_ficha_form.html', context)
 
 
 # --- Vistas para el Panel del Instructor ---

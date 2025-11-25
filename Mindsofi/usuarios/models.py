@@ -1,6 +1,26 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+class Programa(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+    codigo = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    nivel = models.CharField(max_length=50, blank=True, null=True)
+    duracion_meses = models.PositiveIntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return self.nombre
+
+class Ficha(models.Model):
+    JORNADA_CHOICES = [('Diurna', 'Diurna'), ('Nocturna', 'Nocturna'), ('Mixta', 'Mixta'), ('Fines de semana', 'Fines de semana')]
+    numero = models.CharField(max_length=20, unique=True)
+    programa = models.ForeignKey(Programa, on_delete=models.CASCADE, related_name='fichas')
+    jornada = models.CharField(max_length=20, choices=JORNADA_CHOICES, default='Diurna')
+    fecha_inicio = models.DateField(null=True, blank=True)
+    fecha_fin = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.numero} - {self.programa.nombre}"
+
 class Usuario(AbstractUser):
     ROL_CHOICES = [
         ('aprendiz', 'Aprendiz'),
@@ -12,38 +32,18 @@ class Usuario(AbstractUser):
         ('femenino', 'Femenino'),
         ('otro', 'Otro'),
     ]
-    PROGRAMA_CHOICES = [
-        ('', 'Seleccione un programa'),
-        ('programacion', 'Programación de Software'),
-        ('electricidad', 'Electricidad Industrial'),
-        ('telecomunicaciones', 'Telecomunicaciones'),
-        ('audiovisual', 'Producción Audiovisual'),
-        ('mantenimiento', 'Mantenimiento Electromecánico'),
-        ('diseno_grafico', 'Diseño Gráfico'),
-        ('contabilidad', 'Contabilidad y Finanzas'),
-    ]
-    FICHA_CHOICES = [
-        ('', 'Seleccione una ficha'),
-        ('2556678', '2556678'), ('3175010', '3175010'), ('2003120', '2003120'),
-        ('2558341', '2558341'), ('2559123', '2559123'), ('2670689', '2670689'),
-        ('2694501', '2694501'), ('2712345', '2712345'), ('2722890', '2722890'),
-        ('2735678', '2735678'), ('2748901', '2748901'), ('2754321', '2754321'),
-        ('2769876', '2769876'), ('2781122', '2781122'), ('2793344', '2793344'),
-        ('2805566', '2805566'), ('2817788', '2817788'), ('2829900', '2829900'),
-        ('2831234', '2831234'), ('2845678', '2845678'),
-    ]
 
     rol = models.CharField(max_length=20, choices=ROL_CHOICES, default='aprendiz')
     # Campos para Aprendiz
-    programa = models.CharField(
-        max_length=100,
-        choices=PROGRAMA_CHOICES,
+    programa = models.ForeignKey(
+        Programa,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True
     )
-    ficha = models.CharField(
-        max_length=30,
-        choices=FICHA_CHOICES,
+    ficha = models.ForeignKey(
+        Ficha,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True
     )

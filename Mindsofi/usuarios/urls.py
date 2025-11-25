@@ -41,9 +41,11 @@ urlpatterns = [
     path("dashboard/admin/usuarios/", views.admin_usuarios_view, name="admin_usuarios"),
     path("dashboard/admin/programas/", views.admin_programas_view, name="admin_programas"),
     path("dashboard/admin/fichas/", views.admin_fichas_view, name="admin_fichas"),
+    path("dashboard/admin/fichas/crear/", views.admin_ficha_crear_view, name="admin_ficha_crear"),
     path("dashboard/admin/reportes/", views.admin_reportes_view, name="admin_reportes"),
     # URLs para edición en el panel de Admin
     path("dashboard/admin/usuarios/<int:usuario_id>/editar/", views.admin_usuario_editar_view, name="admin_usuario_editar"),
     path("dashboard/admin/programas/<int:programa_id>/editar/", views.admin_programa_editar_view, name="admin_programa_editar"),
     path("dashboard/admin/fichas/<int:ficha_id>/editar/", views.admin_ficha_editar_view, name="admin_ficha_editar"),
+    path("dashboard/admin/fichas/<int:ficha_id>/eliminar/", views.admin_ficha_eliminar_view, name="admin_ficha_eliminar"),
 ]

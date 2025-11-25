@@ -2,57 +2,60 @@
 {% block title %}Gestión de Fichas{% endblock %}
 
 {% block admin_content %}
-<style>
-  .ficha-card {
-    border: 1px solid #39A900;
-    transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
-  }
-  .ficha-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15)!important;
-  }
-  .card-header {
-    background-color: #39A900;
-    color: white;
-  }
-  .btn-primary {
-    background-color: #39A900;
-    border-color: #39A900;
-  }
-  .btn-primary:hover {
-    background-color: #07b449;
-    border-color: #07b449;
-  }
-</style>
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h5 class="mb-0">Gestión de Fichas</h5>
-  <button class="btn btn-primary">Crear Ficha</button>
-</div>
-
-<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-  {% for ficha in fichas %}
-  <div class="col">
-    <div class="card h-100 shadow-sm ficha-card">
-      <div class="card-header">
-        <h6 class="mb-0">Ficha #{{ ficha.numero }}</h6>
-      </div>
-      <div class="card-body">
-        <p class="card-text"><strong>Programa:</strong> {{ ficha.programa }}</p>
-        <p class="card-text"><strong>Jornada:</strong> <span class="badge bg-info text-dark">{{ ficha.jornada }}</span></p>
-        <p class="card-text"><strong>Aprendices:</strong> {{ ficha.aprendices_count }}</p>
-      </div>
-      <div class="card-footer bg-transparent border-top-0 text-end pb-3">
-        <a href="{% url 'admin_ficha_editar' ficha.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-fill"></i> Editar</a>
-        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash-fill"></i> Eliminar</button>
-      </div>
-    </div>
+<div class="card p-4 shadow-sm">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0">Gestión de Fichas</h5>
+    <a href="{% url 'admin_ficha_crear' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle-fill me-2"></i>Crear Nueva Ficha
+    </a>
   </div>
-  {% empty %}
-  <div class="col">
-    <div class="alert alert-info">No hay fichas para mostrar.</div>
-  </div>
-  {% endfor %}
-</div>
 
+  <!-- Botones de Filtro -->
+  <div class="mb-3">
+    <strong class="me-2">Filtrar por nivel:</strong>
+    <a href="{% url 'admin_fichas' %}?nivel=todos" class="btn btn-sm {% if not filtro_actual or filtro_actual == 'todos' %}btn-dark{% else %}btn-outline-dark{% endif %}">
+      Todos
+    </a>
+    {% for nivel in niveles %}
+    <a href="{% url 'admin_fichas' %}?nivel={{ nivel }}" class="btn btn-sm {% if filtro_actual == nivel %}btn-dark{% else %}btn-outline-dark{% endif %}">
+      {{ nivel }}
+    </a>
+    {% endfor %}
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Número de Ficha</th>
+          <th>Programa</th>
+          <th>Jornada</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ficha in fichas %}
+        <tr>
+          <td>{{ ficha.numero }}</td>
+          <td>{{ ficha.programa.nombre }}</td>
+          <td>{{ ficha.jornada }}</td>
+          <td>
+            <a href="{% url 'admin_ficha_editar' ficha.id %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-pencil-fill"></i> Editar
+            </a>
+            <form action="{% url 'admin_ficha_eliminar' ficha.id %}" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta ficha?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash-fill"></i> Eliminar
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center text-muted">No hay fichas registradas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
