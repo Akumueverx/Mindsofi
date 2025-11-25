@@ -11,18 +11,24 @@ class UsuarioCreationForm(UserCreationForm):
             "username",
             "email",
             "rol",
-            "programa",
-            "ficha",
+            "first_name", # Añadido
+            "last_name",  # Añadido
             "documento",
             "telefono",
+            "edad",       # Añadido
+            "genero",     # Añadido
+            "programa",
+            "ficha",
+            "especialidad",
+            "cargo",
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Añadir clases bootstrap a widgets por defecto
         for name, field in self.fields.items():
-            if name == "rol":
-                # selector para rol
+            if name in ["rol", "genero", "programa", "ficha"]:
+                # Aplicar clase 'form-select' a todos los campos de selección
                 field.widget.attrs.update({"class": "form-select"})
             else:
                 field.widget.attrs.update({"class": "form-control"})

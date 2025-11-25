@@ -6,6 +6,10 @@
   body {
     background-color: #ffffff;
   }
+  /* Ocultamos los campos condicionales por defecto */
+  #div_id_programa, #div_id_ficha, #div_id_especialidad, #div_id_cargo {
+    display: none;
+  }
   .register-container {
     max-width: 600px;
   }
@@ -39,11 +43,65 @@
           </div>
         {% endif %}
 
-        {{ form.as_p }}
+        {% for field in form %}
+          <div class="mb-3" id="div_{{ field.auto_id }}">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+              <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+              <div class="invalid-feedback d-block">
+                {{ error }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+
         <button type="submit" class="btn btn-success w-100 mt-3">Registrarse</button>
       </form>
       <p class="mt-4 text-center text-muted">¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia sesión</a></p>
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const rolSelect = document.getElementById('id_rol');
+  const programaDiv = document.getElementById('div_id_programa');
+  const fichaDiv = document.getElementById('div_id_ficha');
+  const especialidadDiv = document.getElementById('div_id_especialidad');
+  const cargoDiv = document.getElementById('div_id_cargo');
+
+  function toggleFields() {
+    const selectedRol = rolSelect.value;
+
+    // Ocultar todos los campos condicionales para empezar de cero
+    programaDiv.style.display = 'none';
+    fichaDiv.style.display = 'none';
+    especialidadDiv.style.display = 'none';
+    cargoDiv.style.display = 'none';
+
+    // Mostrar campos según el rol seleccionado
+    if (selectedRol === 'aprendiz') {
+      programaDiv.style.display = 'block';
+      fichaDiv.style.display = 'block';
+    } else if (selectedRol === 'instructor') {
+      especialidadDiv.style.display = 'block';
+    } else if (selectedRol === 'administrativo') {
+      cargoDiv.style.display = 'block';
+    }
+  }
+
+  // Asegurarse de que los elementos existen antes de añadir el listener
+  if (rolSelect) {
+    // Ejecutar la función cuando cambie la selección del rol
+    rolSelect.addEventListener('change', toggleFields);
+
+    // Ejecutar al cargar la página para establecer el estado inicial correcto
+    toggleFields();
+  }
+});
+</script>
+
 {% endblock %}
