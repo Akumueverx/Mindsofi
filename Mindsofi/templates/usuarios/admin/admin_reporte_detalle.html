@@ -1,13 +1,13 @@
-{% extends "usuarios/instructor/instructor_base.html" %}
+{% extends "usuarios/admin/admin_base.html" %}
 {% block title %}Detalle del Reporte{% endblock %}
 
-{% block instructor_content %}
+{% block admin_content %}
 <div class="card shadow-sm">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h6 class="m-0 font-weight-bold text-primary">
       <i class="bi bi-file-earmark-text-fill me-2"></i>Detalle del Reporte
     </h6>
-    <a href="{% url 'instructor_reportes' %}" class="btn btn-outline-secondary btn-sm">
+    <a href="{% url 'admin_gestion_reportes' %}" class="btn btn-outline-secondary btn-sm">
       <i class="bi bi-arrow-left"></i> Volver al Historial
     </a>
   </div>
@@ -36,7 +36,7 @@
           </p>
         </div>
         <div class="col-md-6">
-          <p><strong>Creado por (Instructor):</strong><br>
+          <p><strong>Creado por (Instructor/Admin):</strong><br>
             {{ reporte.instructor.get_full_name|default:reporte.instructor.username }}
           </p>
         </div>

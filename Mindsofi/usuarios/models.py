@@ -20,6 +20,24 @@ class Ficha(models.Model):
     def __str__(self):
         return f"{self.numero} - {self.programa.nombre}"
 
+class Reporte(models.Model):
+    TIPO_REPORTE_CHOICES = [
+        ('Felicitación', 'Felicitación'),
+        ('Llamado de atención verbal', 'Llamado de atención verbal'),
+        ('Llamado de atención escrito', 'Llamado de atención escrito'),
+        ('Sanción', 'Sanción'),
+        ('Deserción', 'Deserción'),
+    ]
+    tipo = models.CharField(max_length=50, choices=TIPO_REPORTE_CHOICES)
+    descripcion = models.TextField()
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    aprendiz = models.ForeignKey('Usuario', on_delete=models.CASCADE, related_name='reportes_recibidos', limit_choices_to={'rol': 'aprendiz'})
+    instructor = models.ForeignKey('Usuario', on_delete=models.SET_NULL, null=True, related_name='reportes_creados', limit_choices_to={'rol': 'instructor'})
+    ficha = models.ForeignKey(Ficha, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"Reporte de {self.tipo} para {self.aprendiz.username} el {self.fecha_creacion.strftime('%Y-%m-%d')}"
+
 class Usuario(AbstractUser):
     ROL_CHOICES = [
         ('aprendiz', 'Aprendiz'),

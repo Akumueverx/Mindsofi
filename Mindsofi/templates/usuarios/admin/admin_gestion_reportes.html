@@ -1,21 +1,11 @@
-{% extends "usuarios/instructor/instructor_base.html" %}
-{% block title %}Gestión de Reportes{% endblock %}
+{% extends "usuarios/admin/admin_base.html" %}
+{% block title %}Gestión de Reportes Académicos{% endblock %}
 
-{% block instructor_content %}
-
-{% if messages %}
-  {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  {% endfor %}
-{% endif %}
-
+{% block admin_content %}
 <div class="card shadow-sm">
   <div class="card-header d-flex justify-content-between align-items-center">
-    <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-list-ul me-2"></i>Historial de Reportes</h6>
-    <a href="{% url 'instructor_reporte_crear' %}" class="btn btn-primary">
+    <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-list-ul me-2"></i>Historial de Todos los Reportes</h6>
+    <a href="{% url 'admin_reporte_crear' %}" class="btn btn-primary">
       <i class="bi bi-plus-circle-fill me-2"></i>Crear Nuevo Reporte
     </a>
   </div>
@@ -26,6 +16,7 @@
           <tr>
             <th>Tipo</th>
             <th>Aprendiz</th>
+            <th>Instructor</th>
             <th>Ficha</th>
             <th>Fecha</th>
             <th>Acciones</th>
@@ -36,12 +27,13 @@
           <tr>
             <td><span class="badge bg-secondary">{{ reporte.tipo }}</span></td>
             <td>{{ reporte.aprendiz.get_full_name|default:reporte.aprendiz.username }}</td>
+            <td>{{ reporte.instructor.get_full_name|default:reporte.instructor.username }}</td>
             <td>{{ reporte.ficha.numero|default:"N/A" }}</td>
             <td>{{ reporte.fecha_creacion|date:"Y-m-d" }}</td>
-            <td><a href="{% url 'instructor_reporte_detalle' reporte.id %}" class="btn btn-sm btn-outline-info">Ver</a></td>
+            <td><a href="{% url 'admin_reporte_detalle' reporte.id %}" class="btn btn-sm btn-outline-info">Ver</a></td>
           </tr>
           {% empty %}
-          <tr><td colspan="5" class="text-center text-muted">No has creado ningún reporte todavía.</td></tr>
+          <tr><td colspan="6" class="text-center text-muted">No hay reportes en el sistema.</td></tr>
           {% endfor %}
         </tbody>
       </table>

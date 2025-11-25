@@ -1,7 +1,7 @@
 # usuarios/forms.py
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import Usuario, Ficha, Programa
+from .models import Usuario, Ficha, Programa, Reporte
 
 
 class UsuarioCreationForm(UserCreationForm):
@@ -123,6 +123,21 @@ class UsuarioAdminForm(forms.ModelForm):
             if qs.exists():
                 raise forms.ValidationError("Ya existe un usuario con ese número de documento.")
         return documento
+
+class ReporteForm(forms.ModelForm):
+    class Meta:
+        model = Reporte
+        fields = ['tipo', 'aprendiz', 'descripcion']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['tipo'].widget.attrs.update({'class': 'form-select'})
+        self.fields['aprendiz'].widget.attrs.update({'class': 'form-select'})
+        self.fields['descripcion'].widget.attrs.update({'class': 'form-control', 'rows': 4})
+
+        # Filtramos el queryset para que solo muestre aprendices
+        self.fields['aprendiz'].queryset = Usuario.objects.filter(rol='aprendiz').order_by('first_name', 'last_name')
+        self.fields['aprendiz'].label_from_instance = lambda obj: f"{obj.get_full_name()} ({obj.username})"
 
 
 class CustomAuthenticationForm(AuthenticationForm):

@@ -3,8 +3,8 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from .forms import UsuarioCreationForm, CustomAuthenticationForm, FichaForm, ProgramaForm, UsuarioAdminForm
-from .models import Usuario, Ficha, Programa
+from .forms import UsuarioCreationForm, CustomAuthenticationForm, FichaForm, ProgramaForm, UsuarioAdminForm, ReporteForm
+from .models import Usuario, Ficha, Programa, Reporte
 from .decorators import role_required
 
 # Constante para los ambientes del mapa para reducir la duplicación de código
@@ -98,78 +98,30 @@ def dashboard_admin(request):
 @login_required
 @role_required(allowed_roles=['aprendiz'])
 def aprendiz_programa_view(request):
-    # TODO: Obtener el programa del aprendiz actual desde la BD
-    programa_ejemplo = {
-        'nombre': 'Análisis y Desarrollo de Software',
-        'codigo': '228106',
-        'version': '1',
-        'nivel': 'Tecnólogo',
-        'duracion_meses': 24,
-        'descripcion': 'El programa de formación en Análisis y Desarrollo de Software (ADSO) se enfoca en la construcción de soluciones de software, abarcando el ciclo de vida completo del desarrollo, desde el levantamiento de requisitos hasta la implementación y mantenimiento.',
-        'competencias': [
-            'Diseñar la solución de software de acuerdo con los requisitos del cliente.',
-            'Construir el software de acuerdo con el diseño establecido.',
-            'Realizar pruebas al software para verificar su funcionamiento.',
-            'Implantar la solución de software en el ambiente del cliente.',
-            'Promover la interacción idónea consigo mismo, con los demás y con la naturaleza en los contextos laboral y social.'
-        ]
-    }
+    # Obtenemos el programa del usuario que ha iniciado sesión
+    programa = request.user.programa
     context = {
-        'programa': programa_ejemplo
+        'programa': programa
     }
     return render(request, 'usuarios/aprendiz/programa.html', context)
 
 @login_required
 @role_required(allowed_roles=['aprendiz'])
 def aprendiz_ficha_view(request):
-    # TODO: Obtener la ficha del aprendiz actual desde la BD
-    ficha_ejemplo = {
-        'numero': '2556678',
-        'programa_nombre': 'Análisis y Desarrollo de Software',
-        'jornada': 'Diurna',
-        'fecha_inicio': '2023-02-01',
-        'fecha_fin': '2025-02-01',
-        'aprendices_count': 30,
-    }
+    # Obtenemos la ficha del usuario que ha iniciado sesión
+    ficha = request.user.ficha
     context = {
-        'ficha': ficha_ejemplo
+        'ficha': ficha
     }
     return render(request, 'usuarios/aprendiz/ficha.html', context)
 
 @login_required
 @role_required(allowed_roles=['aprendiz'])
 def aprendiz_ficha_detalle_view(request):
-    # TODO: Obtener la ficha detallada del aprendiz actual desde la BD
-    ficha_detalle_ejemplo = {
-        'numero': '2556678',
-        'programa_nombre': 'Análisis y Desarrollo de Software',
-        'jornada': 'Diurna',
-        'fecha_inicio': '2023-02-01',
-        'fecha_fin': '2025-02-01',
-        'aprendices_count': 30,
-        'descripcion': 'La ficha 2556678 pertenece al programa de Análisis y Desarrollo de Software, enfocado en formar tecnólogos capaces de diseñar, construir y mantener soluciones de software.',
-        'instructor_lider': 'Ricardo Gómez',
-        'ubicacion': 'Centro de Formación SENA - Regional Antioquia',
-        'competencias': [
-            'Diseñar la solución de software de acuerdo con los requisitos del cliente.',
-            'Construir el software de acuerdo con el diseño establecido.',
-            'Realizar pruebas al software para verificar su funcionamiento.',
-            'Implantar la solución de software en el ambiente del cliente.',
-            'Promover la interacción idónea consigo mismo, con los demás y con la naturaleza en los contextos laboral y social.'
-        ],
-        'horarios': [
-            {'dia': 'Lunes', 'hora': '08:00 - 12:00', 'competencia': 'Diseño de Interfaces'},
-            {'dia': 'Lunes', 'hora': '13:00 - 17:00', 'competencia': 'Desarrollo Front-End'},
-            {'dia': 'Miércoles', 'hora': '10:00 - 14:00', 'competencia': 'Bases de Datos'},
-            {'dia': 'Jueves', 'hora': '08:00 - 10:00', 'competencia': 'Promover la Interacción Idónea'},
-        ],
-        'contacto': {
-            'telefono': '604 123 4567',
-            'email': 'info@sena.edu.co'
-        }
-    }
+    # Obtenemos la ficha del usuario que ha iniciado sesión
+    ficha = request.user.ficha
     context = {
-        'ficha': ficha_detalle_ejemplo
+        'ficha': ficha
     }
     return render(request, 'usuarios/aprendiz/ficha_detalle.html', context)
 
@@ -220,30 +172,22 @@ def aprendiz_ubicacion_view(request):
 @login_required
 @role_required(allowed_roles=['aprendiz'])
 def aprendiz_instructores_view(request):
-    # TODO: Obtener los instructores asociados a la ficha del aprendiz
-    instructores_ejemplo = [
-        {'id': 1, 'nombre_completo': 'Ricardo Gómez', 'email': 'ricardo.gomez@sena.edu.co', 'especialidad': 'Instructor Técnico - Bases de Datos'},
-        {'id': 2, 'nombre_completo': 'Laura Nuñez', 'email': 'laura.nunez@sena.edu.co', 'especialidad': 'Instructora Técnica - Desarrollo Web'},
-        {'id': 3, 'nombre_completo': 'Sandra Milena', 'email': 'sandra.milena@sena.edu.co', 'especialidad': 'Instructora de Seguimiento y Ética'},
-    ]
+    # Obtenemos los instructores que han creado reportes para el aprendiz actual.
+    # Esta es una forma de encontrar instructores relacionados.
+    # Una mejor forma sería tener una relación directa Ficha-Instructor.
+    reportes_del_aprendiz = Reporte.objects.filter(aprendiz=request.user).select_related('instructor')
+    instructores_ids = reportes_del_aprendiz.values_list('instructor_id', flat=True).distinct()
+    instructores = Usuario.objects.filter(id__in=instructores_ids)
+
     context = {
-        'instructores': instructores_ejemplo
+        'instructores': instructores
     }
     return render(request, 'usuarios/aprendiz/instructores.html', context)
 
 @login_required
 @role_required(allowed_roles=['aprendiz'])
 def aprendiz_instructor_detalle_view(request, instructor_id):
-    # TODO: Obtener el instructor detallado desde la BD
-    instructores_ejemplo = [
-        {'id': 1, 'nombre_completo': 'Ricardo Gómez', 'email': 'ricardo.gomez@sena.edu.co', 'especialidad': 'Instructor Técnico - Bases de Datos', 'telefono': '3101234567', 'horario_atencion': 'Lunes a Viernes 8:00 - 12:00', 'materias': ['Bases de Datos', 'SQL', 'Modelado de Datos']},
-        {'id': 2, 'nombre_completo': 'Laura Nuñez', 'email': 'laura.nunez@sena.edu.co', 'especialidad': 'Instructora Técnica - Desarrollo Web', 'telefono': '3119876543', 'horario_atencion': 'Lunes a Viernes 13:00 - 17:00', 'materias': ['HTML', 'CSS', 'JavaScript', 'React']},
-        {'id': 3, 'nombre_completo': 'Sandra Milena', 'email': 'sandra.milena@sena.edu.co', 'especialidad': 'Instructora de Seguimiento y Ética', 'telefono': '3125558899', 'horario_atencion': 'Martes y Jueves 10:00 - 14:00', 'materias': ['Ética Profesional', 'Seguimiento Académico']},
-    ]
-    instructor = next((i for i in instructores_ejemplo if i['id'] == instructor_id), None)
-    if not instructor:
-        # TODO: Manejar instructor no encontrado
-        pass
+    instructor = get_object_or_404(Usuario, id=instructor_id, rol='instructor')
     context = {
         'instructor': instructor
     }
@@ -476,14 +420,58 @@ def admin_usuario_eliminar_view(request, usuario_id):
 def admin_reportes_view(request):
     # TODO: Obtener datos reales para los reportes
     context = {
-        'total_usuarios': 150,
-        'total_aprendices': 120,
-        'total_instructores': 25,
-        'total_administrativos': 5,
-        'total_fichas': 10,
-        'total_programas': 4,
+        'total_usuarios': Usuario.objects.count(),
+        'total_aprendices': Usuario.objects.filter(rol='aprendiz').count(),
+        'total_instructores': Usuario.objects.filter(rol='instructor').count(),
+        'total_administrativos': Usuario.objects.filter(rol='administrativo').count(),
+        'total_fichas': Ficha.objects.count(),
+        'total_programas': Programa.objects.count(),
     }
     return render(request, 'usuarios/admin/admin_reportes.html', context)
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_gestion_reportes_view(request):
+    """
+    Vista para que el admin vea TODOS los reportes del sistema.
+    """
+    reportes = Reporte.objects.select_related('aprendiz', 'instructor', 'ficha').all().order_by('-fecha_creacion')
+    context = {
+        'reportes': reportes,
+    }
+    return render(request, 'usuarios/admin/admin_gestion_reportes.html', context)
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_reporte_crear_view(request):
+    """
+    Vista para que el admin cree un nuevo reporte.
+    """
+    if request.method == 'POST':
+        form = ReporteForm(request.POST)
+        if form.is_valid():
+            reporte = form.save(commit=False)
+            # Si un admin crea un reporte, se le asigna como instructor
+            reporte.instructor = request.user
+            if reporte.aprendiz and reporte.aprendiz.ficha:
+                reporte.ficha = reporte.aprendiz.ficha
+            reporte.save()
+            messages.success(request, 'Reporte creado exitosamente.')
+            return redirect('admin_gestion_reportes')
+    else:
+        form = ReporteForm()
+
+    context = {
+        'form': form
+    }
+    return render(request, 'usuarios/admin/admin_reporte_crear.html', context)
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_reporte_detalle_view(request, reporte_id):
+    reporte = get_object_or_404(Reporte.objects.select_related('aprendiz', 'instructor', 'ficha', 'ficha__programa'), id=reporte_id)
+    context = {'reporte': reporte}
+    return render(request, 'usuarios/admin/admin_reporte_detalle.html', context)
 
 # --- Vistas de Edición para el Panel del Admin ---
 
@@ -616,69 +604,58 @@ def instructor_anuncios_view(request):
 @login_required
 @role_required(allowed_roles=['instructor', 'administrativo'])
 def instructor_reportes_view(request):
-    if request.method == 'POST':
-        # TODO: Procesar el formulario para crear un nuevo reporte
-        messages.success(request, 'Reporte creado exitosamente.')
-        return redirect('instructor_reportes')
-
-    # TODO: Obtener reportes reales desde la base de datos
-    reportes_ejemplo = [
-        {'tipo': 'Sanción', 'aprendiz': 'Carlos Alberto Pérez', 'ficha': '2556678', 'fecha': '2024-05-10', 'descripcion': 'Llamado de atención verbal por inasistencia.'},
-        {'tipo': 'Deserción', 'aprendiz': 'Laura Sofía Cadena', 'ficha': '2558341', 'fecha': '2024-04-22', 'descripcion': 'Aprendiz no ha asistido por más de 3 días sin justificación.'},
-        {'tipo': 'Felicitación', 'aprendiz': 'Ana María López', 'ficha': '2556678', 'fecha': '2024-05-15', 'descripcion': 'Excelente desempeño en la competencia de Diseño de Interfaces.'},
-        {'tipo': 'Sanción', 'aprendiz': 'Juan David Restrepo', 'ficha': '2556678', 'fecha': '2024-03-18', 'descripcion': 'Llamado de atención escrito por uso inadecuado de equipos.'},
-    ]
-    # Asignar IDs a los reportes para enlaces
-    for i, reporte in enumerate(reportes_ejemplo):
-        reporte['id'] = i + 1
-
-    tipos_reporte = sorted(list(set(r['tipo'] for r in reportes_ejemplo)))
-
-    # TODO: Obtener fichas reales del instructor
-    fichas_ejemplo = [
-        {'id': 1, 'numero': '2556678', 'programa': 'Análisis y Desarrollo de Software'},
-        {'id': 2, 'numero': '2558341', 'programa': 'Producción Multimedia'},
-    ]
-
-    # TODO: Obtener aprendices reales
-    aprendices_ejemplo = [
-        {'id': 101, 'ficha_id': 1, 'nombre_completo': 'Ana María López'},
-        {'id': 102, 'ficha_id': 1, 'nombre_completo': 'Carlos Alberto Pérez'},
-        {'id': 103, 'ficha_id': 1, 'nombre_completo': 'Sofía Rodríguez Gómez'},
-        {'id': 104, 'ficha_id': 2, 'nombre_completo': 'Laura Sofía Cadena'},
-        {'id': 105, 'ficha_id': 2, 'nombre_completo': 'Juan David Restrepo'},
-    ]
+    # Obtener reportes existentes para mostrarlos en la lista
+    # Si es admin, ve todo. Si es instructor, solo ve los que creó.
+    if request.user.rol == 'administrativo':
+        reportes = Reporte.objects.select_related('aprendiz', 'instructor', 'ficha').all().order_by('-fecha_creacion')
+    else:
+        reportes = Reporte.objects.filter(instructor=request.user).select_related('aprendiz', 'ficha').order_by('-fecha_creacion')
 
     context = {
-        'reportes': reportes_ejemplo,
-        'tipos_reporte': tipos_reporte,
-        'fichas': fichas_ejemplo,
-        'aprendices': aprendices_ejemplo
+        'reportes': reportes,
     }
     return render(request, 'usuarios/instructor/instructor_reportes.html', context)
 
 @login_required
 @role_required(allowed_roles=['instructor', 'administrativo'])
 def instructor_reporte_detalle_view(request, reporte_id):
-    # TODO: Reemplazar con la lógica real para obtener el reporte desde la BD
-    reportes_ejemplo = [
-        {'id': 1, 'tipo': 'Sanción', 'aprendiz': 'Carlos Alberto Pérez', 'ficha': '2556678', 'fecha': '2024-05-10', 'descripcion': 'Llamado de atención verbal por inasistencia.', 'gravedad': 'Leve', 'acciones': 'Se realiza seguimiento semanal.'},
-        {'id': 2, 'tipo': 'Deserción', 'aprendiz': 'Laura Sofía Cadena', 'ficha': '2558341', 'fecha': '2024-04-22', 'descripcion': 'Aprendiz no ha asistido por más de 3 días sin justificación.', 'gravedad': 'Grave', 'acciones': 'Se inicia proceso de deserción según reglamento.'},
-        {'id': 3, 'tipo': 'Felicitación', 'aprendiz': 'Ana María López', 'ficha': '2556678', 'fecha': '2024-05-15', 'descripcion': 'Excelente desempeño en la competencia de Diseño de Interfaces.', 'gravedad': 'N/A', 'acciones': 'Se anota en el historial académico.'},
-        {'id': 4, 'tipo': 'Sanción', 'aprendiz': 'Juan David Restrepo', 'ficha': '2556678', 'fecha': '2024-03-18', 'descripcion': 'Llamado de atención escrito por uso inadecuado de equipos.', 'gravedad': 'Moderada', 'acciones': 'Se suspende el acceso al equipo por una semana.'},
-    ]
-    # Asignamos un 'id' a cada reporte para poder buscarlo
-    for i, reporte in enumerate(reportes_ejemplo):
-        reporte['id'] = i + 1
+    # Obtenemos el reporte específico desde la base de datos.
+    # Si no se encuentra, mostrará un error 404.
+    reporte = get_object_or_404(Reporte.objects.select_related('aprendiz', 'instructor', 'ficha', 'ficha__programa'), id=reporte_id)
 
-    reporte_seleccionado = next((r for r in reportes_ejemplo if r['id'] == reporte_id), None)
+    # Verificación de permisos: un instructor solo puede ver sus propios reportes.
+    # Un administrador puede ver todos.
+    if request.user.rol == 'instructor' and reporte.instructor != request.user:
+        messages.error(request, "No tienes permiso para ver este reporte.")
+        return redirect('instructor_reportes')
 
     context = {
-        'reporte': reporte_seleccionado
+        'reporte': reporte
     }
-    # Asegúrate de tener una plantilla en 'usuarios/instructor/instructor_reporte_detalle.html'
     return render(request, 'usuarios/instructor/instructor_reporte_detalle.html', context)
 
+
+@login_required
+@role_required(allowed_roles=['instructor', 'administrativo'])
+def instructor_reporte_crear_view(request):
+    if request.method == 'POST':
+        form = ReporteForm(request.POST)
+        if form.is_valid():
+            reporte = form.save(commit=False)
+            reporte.instructor = request.user
+            # Asigna la ficha del aprendiz al reporte, si el aprendiz tiene una.
+            if reporte.aprendiz and reporte.aprendiz.ficha:
+                reporte.ficha = reporte.aprendiz.ficha
+            reporte.save()
+            messages.success(request, 'Reporte creado exitosamente.')
+            return redirect('instructor_reportes')
+    else:
+        form = ReporteForm()
+
+    context = {
+        'form': form
+    }
+    return render(request, 'usuarios/instructor/instructor_reporte_crear.html', context)
 
 @login_required
 @role_required(allowed_roles=['instructor', 'administrativo'])

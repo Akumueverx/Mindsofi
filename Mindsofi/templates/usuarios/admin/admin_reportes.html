@@ -1,59 +1,98 @@
 {% extends "usuarios/admin/admin_base.html" %}
 {% block title %}Reportes Generales{% endblock %}
-
+ 
 {% block admin_content %}
 <style>
-  .stat-card {
-    background-color: #f0f9f0;
-    border: 2px solid #39A900;
-    border-radius: 8px;
-    transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
+  .report-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    text-decoration: none;
+    color: inherit;
   }
-  .stat-card:hover {
+  .report-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15)!important;
+    color: inherit;
   }
-  .stat-card .card-body {
+  .report-card .card-body {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
-  .stat-icon {
+  .report-card .display-4 {
+    font-weight: 700;
+  }
+  .report-card i {
     font-size: 3rem;
-    color: #39A900;
-    opacity: 0.7;
-  }
-  .stat-number {
-    font-size: 2.5rem;
-    font-weight: 600;
-    color: #212529;
-  }
-  .stat-label {
-    font-size: 1.1rem;
-    color: #6c757d;
+    opacity: 0.3;
   }
 </style>
 
-<h5 class="mb-4">Reportes y Estadísticas Generales</h5>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h5 class="mb-0">Reportes y Estadísticas Generales</h5>
+  <a href="{% url 'admin_gestion_reportes' %}" class="btn btn-outline-primary">
+    <i class="bi bi-file-earmark-text-fill me-2"></i>Crear/Ver Reportes Académicos
+  </a>
+</div>
 
-<div class="row g-4">
-  <div class="col-md-6 col-lg-4">
-    <div class="card stat-card"><div class="card-body"><div><div class="stat-number">{{ total_usuarios }}</div><div class="stat-label">Usuarios Totales</div></div><i class="bi bi-people-fill stat-icon"></i></div></div>
+<div class="row">
+  <!-- Tarjeta de Usuarios -->
+  <div class="col-xl-4 col-md-6 mb-4">
+    <a href="{% url 'admin_usuarios' %}" class="card border-left-primary shadow h-100 py-2 report-card">
+      <div class="card-body">
+        <div>
+          <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Usuarios</div>
+          <div class="h5 mb-0 font-weight-bold text-gray-800 display-4">{{ total_usuarios }}</div>
+        </div>
+        <i class="bi bi-people-fill"></i>
+      </div>
+    </a>
   </div>
-  <div class="col-md-6 col-lg-4">
-    <div class="card stat-card"><div class="card-body"><div><div class="stat-number">{{ total_aprendices }}</div><div class="stat-label">Aprendices</div></div><i class="bi bi-person-fill stat-icon"></i></div></div>
+
+  <!-- Tarjeta de Fichas -->
+  <div class="col-xl-4 col-md-6 mb-4">
+    <a href="{% url 'admin_fichas' %}" class="card border-left-success shadow h-100 py-2 report-card">
+      <div class="card-body">
+        <div>
+          <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Fichas</div>
+          <div class="h5 mb-0 font-weight-bold text-gray-800 display-4">{{ total_fichas }}</div>
+        </div>
+        <i class="bi bi-collection-fill"></i>
+      </div>
+    </a>
   </div>
-  <div class="col-md-6 col-lg-4">
-    <div class="card stat-card"><div class="card-body"><div><div class="stat-number">{{ total_instructores }}</div><div class="stat-label">Instructores</div></div><i class="bi bi-person-workspace stat-icon"></i></div></div>
+
+  <!-- Tarjeta de Programas -->
+  <div class="col-xl-4 col-md-6 mb-4">
+    <a href="{% url 'admin_programas' %}" class="card border-left-info shadow h-100 py-2 report-card">
+      <div class="card-body">
+        <div>
+          <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Programas</div>
+          <div class="h5 mb-0 font-weight-bold text-gray-800 display-4">{{ total_programas }}</div>
+        </div>
+        <i class="bi bi-book-half"></i>
+      </div>
+    </a>
   </div>
-  <div class="col-md-6 col-lg-4">
-    <div class="card stat-card"><div class="card-body"><div><div class="stat-number">{{ total_administrativos }}</div><div class="stat-label">Admins</div></div><i class="bi bi-person-badge-fill stat-icon"></i></div></div>
+</div>
+
+<hr class="my-4">
+<h6 class="mb-3">Desglose por Rol</h6>
+
+<div class="row">
+  <div class="col-lg-4 mb-4">
+    <div class="card bg-light text-dark">
+      <div class="card-body">Aprendices<span class="badge bg-dark float-end">{{ total_aprendices }}</span></div>
+    </div>
   </div>
-  <div class="col-md-6 col-lg-4">
-    <div class="card stat-card"><div class="card-body"><div><div class="stat-number">{{ total_fichas }}</div><div class="stat-label">Fichas Activas</div></div><i class="bi bi-card-list stat-icon"></i></div></div>
+  <div class="col-lg-4 mb-4">
+    <div class="card bg-light text-dark">
+      <div class="card-body">Instructores<span class="badge bg-dark float-end">{{ total_instructores }}</span></div>
+    </div>
   </div>
-  <div class="col-md-6 col-lg-4">
-    <div class="card stat-card"><div class="card-body"><div><div class="stat-number">{{ total_programas }}</div><div class="stat-label">Programas</div></div><i class="bi bi-journal-album stat-icon"></i></div></div>
+  <div class="col-lg-4 mb-4">
+    <div class="card bg-light text-dark">
+      <div class="card-body">Administrativos<span class="badge bg-dark float-end">{{ total_administrativos }}</span></div>
+    </div>
   </div>
 </div>
 

@@ -33,6 +33,7 @@ urlpatterns = [
     path("instructor/horarios/", views.instructor_horarios_view, name="instructor_horarios"),
     path("instructor/anuncios/", views.instructor_anuncios_view, name="instructor_anuncios"),
     path("instructor/reportes/", views.instructor_reportes_view, name="instructor_reportes"),
+    path("instructor/reportes/crear/", views.instructor_reporte_crear_view, name="instructor_reporte_crear"),
     path("instructor/reportes/<int:reporte_id>/", views.instructor_reporte_detalle_view, name="instructor_reporte_detalle"),
     path("instructor/fichas/<int:ficha_id>/aprendices/", views.instructor_ficha_aprendices_view, name="instructor_ficha_aprendices"),
     path("instructor/fichas/<int:ficha_id>/aprendices/<int:aprendiz_id>/", views.instructor_aprendiz_perfil_view, name="instructor_aprendiz_perfil"),
@@ -45,6 +46,11 @@ urlpatterns = [
     path("dashboard/admin/usuarios/crear/", views.admin_usuario_crear_view, name="admin_usuario_crear"),
     path("dashboard/admin/programas/crear/", views.admin_programa_crear_view, name="admin_programa_crear"),
     path("dashboard/admin/reportes/", views.admin_reportes_view, name="admin_reportes"),
+    # URLs para gestión de reportes por el Admin
+    path("dashboard/admin/gestion-reportes/", views.admin_gestion_reportes_view, name="admin_gestion_reportes"),
+    path("dashboard/admin/gestion-reportes/crear/", views.admin_reporte_crear_view, name="admin_reporte_crear"),
+    path("dashboard/admin/gestion-reportes/<int:reporte_id>/", views.admin_reporte_detalle_view, name="admin_reporte_detalle"),
+
     # URLs para edición en el panel de Admin
     path("dashboard/admin/usuarios/<int:usuario_id>/editar/", views.admin_usuario_editar_view, name="admin_usuario_editar"),
     path("dashboard/admin/usuarios/<int:usuario_id>/eliminar/", views.admin_usuario_eliminar_view, name="admin_usuario_eliminar"),
