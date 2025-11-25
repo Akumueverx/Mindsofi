@@ -30,6 +30,7 @@
           <th>Número de Ficha</th>
           <th>Programa</th>
           <th>Jornada</th>
+          <th>Cupos</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -40,7 +41,13 @@
           <td>{{ ficha.programa.nombre }}</td>
           <td>{{ ficha.jornada }}</td>
           <td>
+            <span class="badge {% if ficha.aprendices.count >= ficha.cupo_maximo %}bg-danger{% else %}bg-info{% endif %}">{{ ficha.aprendices.count }} / {{ ficha.cupo_maximo }}</span>
+          </td>
+          <td>
             <a href="{% url 'admin_ficha_editar' ficha.id %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-pencil-fill"></i> Editar
+            </a>
+            <a href="{% url 'admin_ficha_gestionar_aprendices' ficha.id %}" class="btn btn-sm btn-outline-info">
               <i class="bi bi-pencil-fill"></i> Editar
             </a>
             <form action="{% url 'admin_ficha_eliminar' ficha.id %}" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta ficha?');">
@@ -52,7 +59,7 @@
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="4" class="text-center text-muted">No hay fichas registradas.</td></tr>
+        <tr><td colspan="5" class="text-center text-muted">No hay fichas registradas.</td></tr>
         {% endfor %}
       </tbody>
     </table>

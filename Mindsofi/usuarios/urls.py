@@ -42,10 +42,18 @@ urlpatterns = [
     path("dashboard/admin/programas/", views.admin_programas_view, name="admin_programas"),
     path("dashboard/admin/fichas/", views.admin_fichas_view, name="admin_fichas"),
     path("dashboard/admin/fichas/crear/", views.admin_ficha_crear_view, name="admin_ficha_crear"),
+    path("dashboard/admin/usuarios/crear/", views.admin_usuario_crear_view, name="admin_usuario_crear"),
+    path("dashboard/admin/programas/crear/", views.admin_programa_crear_view, name="admin_programa_crear"),
     path("dashboard/admin/reportes/", views.admin_reportes_view, name="admin_reportes"),
     # URLs para edición en el panel de Admin
     path("dashboard/admin/usuarios/<int:usuario_id>/editar/", views.admin_usuario_editar_view, name="admin_usuario_editar"),
+    path("dashboard/admin/usuarios/<int:usuario_id>/eliminar/", views.admin_usuario_eliminar_view, name="admin_usuario_eliminar"),
     path("dashboard/admin/programas/<int:programa_id>/editar/", views.admin_programa_editar_view, name="admin_programa_editar"),
+    path("dashboard/admin/programas/<int:programa_id>/eliminar/", views.admin_programa_eliminar_view, name="admin_programa_eliminar"),
     path("dashboard/admin/fichas/<int:ficha_id>/editar/", views.admin_ficha_editar_view, name="admin_ficha_editar"),
     path("dashboard/admin/fichas/<int:ficha_id>/eliminar/", views.admin_ficha_eliminar_view, name="admin_ficha_eliminar"),
+    # URLs para gestionar aprendices en una ficha
+    path("dashboard/admin/fichas/<int:ficha_id>/gestionar-aprendices/", views.admin_ficha_gestionar_aprendices_view, name="admin_ficha_gestionar_aprendices"),
+    path("dashboard/admin/fichas/<int:ficha_id>/agregar-aprendiz/<int:usuario_id>/", views.admin_ficha_agregar_aprendiz_view, name="admin_ficha_agregar_aprendiz"),
+    path("dashboard/admin/fichas/<int:ficha_id>/remover-aprendiz/<int:usuario_id>/", views.admin_ficha_remover_aprendiz_view, name="admin_ficha_remover_aprendiz"),
 ]

@@ -3,9 +3,7 @@ from django.db import models
 
 class Programa(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
-    codigo = models.CharField(max_length=20, unique=True, blank=True, null=True)
     nivel = models.CharField(max_length=50, blank=True, null=True)
-    duracion_meses = models.PositiveIntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.nombre
@@ -17,6 +15,7 @@ class Ficha(models.Model):
     jornada = models.CharField(max_length=20, choices=JORNADA_CHOICES, default='Diurna')
     fecha_inicio = models.DateField(null=True, blank=True)
     fecha_fin = models.DateField(null=True, blank=True)
+    cupo_maximo = models.PositiveIntegerField(default=30, help_text="Número máximo de aprendices en la ficha.")
 
     def __str__(self):
         return f"{self.numero} - {self.programa.nombre}"
@@ -45,7 +44,8 @@ class Usuario(AbstractUser):
         Ficha,
         on_delete=models.SET_NULL,
         blank=True,
-        null=True
+        null=True,
+        related_name='aprendices'
     )
     # Campos generales
     documento = models.CharField(max_length=30, blank=True, null=True, unique=True)

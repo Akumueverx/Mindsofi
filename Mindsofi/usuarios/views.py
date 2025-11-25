@@ -1,9 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-
-from .forms import UsuarioCreationForm, CustomAuthenticationForm, FichaForm
+from django.views.decorators.http import require_POST
+from .forms import UsuarioCreationForm, CustomAuthenticationForm, FichaForm, ProgramaForm, UsuarioAdminForm
 from .models import Usuario, Ficha, Programa
 from .decorators import role_required
 
@@ -301,30 +301,19 @@ def aprendiz_soporte_view(request):
 @login_required
 @role_required(allowed_roles=['administrativo'])
 def admin_usuarios_view(request):
-    # TODO: Obtener usuarios reales de la BD
-    usuarios_ejemplo = [
-        {'id': 1, 'nombre_completo': 'Ana María López', 'email': 'ana.lopez@example.com', 'rol': 'aprendiz'},
-        {'id': 2, 'nombre_completo': 'Carlos Alberto Pérez', 'email': 'carlos.perez@example.com', 'rol': 'aprendiz'},
-        {'id': 3, 'nombre_completo': 'Ricardo Gómez', 'email': 'ricardo.gomez@sena.edu.co', 'rol': 'instructor'},
-        {'id': 4, 'nombre_completo': 'Laura Nuñez', 'email': 'laura.nunez@sena.edu.co', 'rol': 'instructor'},
-        {'id': 5, 'nombre_completo': 'Admin MindSodfi', 'email': 'admin@sena.edu.co', 'rol': 'administrativo'},
-    ]
+    # Obtenemos todos los usuarios excepto el superusuario para no mostrarlo en la lista
+    usuarios = Usuario.objects.filter(is_superuser=False).order_by('first_name', 'last_name', 'username')
     context = {
-        'usuarios': usuarios_ejemplo
+        'usuarios': usuarios
     }
     return render(request, 'usuarios/admin/admin_usuarios.html', context)
 
 @login_required
 @role_required(allowed_roles=['administrativo'])
 def admin_programas_view(request):
-    # TODO: Obtener programas reales de la BD
-    programas_ejemplo = [
-        {'id': 1, 'nombre': 'Análisis y Desarrollo de Software', 'codigo': '228106', 'nivel': 'Tecnólogo', 'duracion_meses': 24},
-        {'id': 2, 'nombre': 'Producción Multimedia', 'codigo': '228107', 'nivel': 'Tecnólogo', 'duracion_meses': 24},
-        {'id': 3, 'nombre': 'Sistemas', 'codigo': '228108', 'nivel': 'Técnico', 'duracion_meses': 12},
-    ]
+    programas = Programa.objects.all().order_by('nombre')
     context = {
-        'programas': programas_ejemplo
+        'programas': programas
     }
     return render(request, 'usuarios/admin/admin_programas.html', context)
 
@@ -368,6 +357,52 @@ def admin_ficha_crear_view(request):
 
 @login_required
 @role_required(allowed_roles=['administrativo'])
+def admin_ficha_gestionar_aprendices_view(request, ficha_id):
+    ficha = get_object_or_404(Ficha, id=ficha_id)
+    
+    # Aprendices que ya están en esta ficha
+    aprendices_en_ficha = Usuario.objects.filter(rol='aprendiz', ficha=ficha).order_by('last_name', 'first_name')
+    
+    # Aprendices que no tienen ninguna ficha asignada
+    aprendices_disponibles = Usuario.objects.filter(rol='aprendiz', ficha__isnull=True).order_by('last_name', 'first_name')
+    
+    context = {
+        'ficha': ficha,
+        'aprendices_en_ficha': aprendices_en_ficha,
+        'aprendices_disponibles': aprendices_disponibles,
+    }
+    return render(request, 'usuarios/admin/admin_ficha_gestionar_aprendices.html', context)
+
+@require_POST
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_ficha_agregar_aprendiz_view(request, ficha_id, usuario_id):
+    ficha = get_object_or_404(Ficha, id=ficha_id)
+    
+    # Verificamos si la ficha ya está llena
+    if ficha.aprendices.count() >= ficha.cupo_maximo:
+        messages.error(request, f"No se puede agregar al aprendiz. La ficha #{ficha.numero} ya ha alcanzado su cupo máximo de {ficha.cupo_maximo} personas.")
+    else:
+        aprendiz = get_object_or_404(Usuario, id=usuario_id, rol='aprendiz')
+        aprendiz.ficha = ficha
+        aprendiz.programa = ficha.programa # Asignamos también el programa de la ficha
+        aprendiz.save()
+        messages.success(request, f"'{aprendiz.get_full_name()}' ha sido añadido a la ficha #{ficha.numero}.")
+    return redirect('admin_ficha_gestionar_aprendices', ficha_id=ficha.id)
+
+@require_POST
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_ficha_remover_aprendiz_view(request, ficha_id, usuario_id):
+    aprendiz = get_object_or_404(Usuario, id=usuario_id, rol='aprendiz', ficha_id=ficha_id)
+    aprendiz.ficha = None
+    aprendiz.programa = None
+    aprendiz.save()
+    messages.success(request, f"'{aprendiz.get_full_name()}' ha sido removido de la ficha.")
+    return redirect('admin_ficha_gestionar_aprendices', ficha_id=ficha_id)
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
 def admin_ficha_eliminar_view(request, ficha_id):
     ficha = Ficha.objects.get(id=ficha_id)
     if request.method == 'POST':
@@ -377,6 +412,64 @@ def admin_ficha_eliminar_view(request, ficha_id):
     
     # Si no es POST, puedes mostrar una página de confirmación (opcional)
     return redirect('admin_fichas')
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_programa_crear_view(request):
+    if request.method == 'POST':
+        form = ProgramaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Programa creado exitosamente.')
+            return redirect('admin_programas')
+    else:
+        form = ProgramaForm()
+    
+    context = {
+        'form': form,
+        'titulo': 'Crear Nuevo Programa'
+    }
+    return render(request, 'usuarios/admin/admin_programa_form.html', context)
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_programa_eliminar_view(request, programa_id):
+    programa = Programa.objects.get(id=programa_id)
+    if request.method == 'POST':
+        programa.delete()
+        messages.success(request, f"Programa '{programa.nombre}' eliminado correctamente.")
+        return redirect('admin_programas')
+    
+    return redirect('admin_programas')
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_usuario_crear_view(request):
+    if request.method == 'POST':
+        form = UsuarioCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Usuario creado exitosamente.')
+            return redirect('admin_usuarios')
+    else:
+        form = UsuarioCreationForm()
+    
+    context = {
+        'form': form,
+        'titulo': 'Crear Nuevo Usuario'
+    }
+    return render(request, 'usuarios/admin/admin_usuario_form.html', context)
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_usuario_eliminar_view(request, usuario_id):
+    usuario = Usuario.objects.get(id=usuario_id)
+    if request.method == 'POST':
+        # No permitimos eliminar al usuario que está logueado
+        if request.user.id != usuario.id:
+            usuario.delete()
+            messages.success(request, f"Usuario '{usuario.username}' eliminado correctamente.")
+    return redirect('admin_usuarios')
 
 @login_required
 @role_required(allowed_roles=['administrativo'])
@@ -397,48 +490,40 @@ def admin_reportes_view(request):
 @login_required
 @role_required(allowed_roles=['administrativo'])
 def admin_usuario_editar_view(request, usuario_id):
-    # TODO: Obtener usuario real de la BD
-    usuarios_ejemplo = [
-        {'id': 1, 'nombre_completo': 'Ana María López', 'email': 'ana.lopez@example.com', 'rol': 'aprendiz'},
-        {'id': 2, 'nombre_completo': 'Carlos Alberto Pérez', 'email': 'carlos.perez@example.com', 'rol': 'aprendiz'},
-        {'id': 3, 'nombre_completo': 'Ricardo Gómez', 'email': 'ricardo.gomez@sena.edu.co', 'rol': 'instructor'},
-        {'id': 4, 'nombre_completo': 'Laura Nuñez', 'email': 'laura.nunez@sena.edu.co', 'rol': 'instructor'},
-        {'id': 5, 'nombre_completo': 'Admin MindSodfi', 'email': 'admin@sena.edu.co', 'rol': 'administrativo'},
-    ]
-    usuario = next((u for u in usuarios_ejemplo if u['id'] == usuario_id), None)
-
+    usuario = Usuario.objects.get(id=usuario_id)
     if request.method == 'POST':
-        # TODO: Lógica para actualizar el usuario en la BD
-        messages.success(request, f"Usuario '{usuario['nombre_completo']}' actualizado correctamente.")
-        return redirect('admin_usuarios')
+        form = UsuarioAdminForm(request.POST, instance=usuario)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Usuario '{usuario.username}' actualizado correctamente.")
+            return redirect('admin_usuarios')
+    else:
+        form = UsuarioAdminForm(instance=usuario)
 
     context = {
-        'usuario': usuario,
-        'roles': ['aprendiz', 'instructor', 'administrativo']
+        'form': form,
+        'titulo': f'Editar Usuario: {usuario.username}'
     }
-    return render(request, 'usuarios/admin/admin_usuario_editar.html', context)
+    return render(request, 'usuarios/admin/admin_usuario_form.html', context)
 
 @login_required
 @role_required(allowed_roles=['administrativo'])
 def admin_programa_editar_view(request, programa_id):
-    # TODO: Obtener programa real de la BD
-    programas_ejemplo = [
-        {'id': 1, 'nombre': 'Análisis y Desarrollo de Software', 'codigo': '228106', 'nivel': 'Tecnólogo', 'duracion_meses': 24},
-        {'id': 2, 'nombre': 'Producción Multimedia', 'codigo': '228107', 'nivel': 'Tecnólogo', 'duracion_meses': 24},
-        {'id': 3, 'nombre': 'Sistemas', 'codigo': '228108', 'nivel': 'Técnico', 'duracion_meses': 12},
-    ]
-    programa = next((p for p in programas_ejemplo if p['id'] == programa_id), None)
-
+    programa = Programa.objects.get(id=programa_id)
     if request.method == 'POST':
-        # TODO: Lógica para actualizar el programa en la BD
-        messages.success(request, f"Programa '{programa['nombre']}' actualizado correctamente.")
-        return redirect('admin_programas')
+        form = ProgramaForm(request.POST, instance=programa)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Programa '{programa.nombre}' actualizado correctamente.")
+            return redirect('admin_programas')
+    else:
+        form = ProgramaForm(instance=programa)
 
     context = {
-        'programa': programa,
-        'niveles': ['Técnico', 'Tecnólogo', 'Especialización Tecnológica']
+        'form': form,
+        'titulo': f"Editar Programa: {programa.nombre}"
     }
-    return render(request, 'usuarios/admin/admin_programa_editar.html', context)
+    return render(request, 'usuarios/admin/admin_programa_form.html', context)
 
 @login_required
 @role_required(allowed_roles=['administrativo'])

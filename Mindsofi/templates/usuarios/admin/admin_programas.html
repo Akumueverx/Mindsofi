@@ -2,57 +2,45 @@
 {% block title %}Gestión de Programas{% endblock %}
 
 {% block admin_content %}
-<style>
-  .programa-card {
-    border: 1px solid #39A900;
-    transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
-  }
-  .programa-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15)!important;
-  }
-  .card-header {
-    background-color: #f0f9f0;
-    border-bottom: 1px solid #39A900;
-  }
-  .btn-primary {
-    background-color: #39A900;
-    border-color: #39A900;
-  }
-  .btn-primary:hover {
-    background-color: #07b449;
-    border-color: #07b449;
-  }
-</style>
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h5 class="mb-0">Gestión de Programas de Formación</h5>
-  <button class="btn btn-primary">Crear Programa</button>
-</div>
-
-<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-  {% for programa in programas %}
-  <div class="col">
-    <div class="card h-100 shadow-sm programa-card">
-      <div class="card-header">
-        <h6 class="mb-0">{{ programa.nombre }}</h6>
-      </div>
-      <div class="card-body">
-        <p class="card-text"><strong>Código:</strong> {{ programa.codigo }}</p>
-        <p class="card-text"><strong>Nivel:</strong> <span class="badge bg-secondary">{{ programa.nivel }}</span></p>
-        <p class="card-text"><strong>Duración:</strong> {{ programa.duracion_meses }} meses</p>
-      </div>
-      <div class="card-footer bg-transparent border-top-0 text-end pb-3">
-        <a href="{% url 'admin_programa_editar' programa.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-fill"></i> Editar</a>
-        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash-fill"></i> Eliminar</button>
-      </div>
-    </div>
+<div class="card p-4 shadow-sm">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0">Gestión de Programas de Formación</h5>
+    <a href="{% url 'admin_programa_crear' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle-fill me-2"></i>Crear Nuevo Programa
+    </a>
   </div>
-  {% empty %}
-  <div class="col">
-    <div class="alert alert-info">No hay programas para mostrar.</div>
-  </div>
-  {% endfor %}
-</div>
 
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Nombre del Programa</th>
+          <th>Nivel</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for programa in programas %}
+        <tr>
+          <td>{{ programa.nombre }}</td>
+          <td>{{ programa.nivel|default:"N/A" }}</td>
+          <td>
+            <a href="{% url 'admin_programa_editar' programa.id %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-pencil-fill"></i> Editar
+            </a>
+            <form action="{% url 'admin_programa_eliminar' programa.id %}" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este programa?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash-fill"></i> Eliminar
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="text-center text-muted">No hay programas registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
