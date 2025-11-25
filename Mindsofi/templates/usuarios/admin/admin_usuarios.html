@@ -39,57 +39,9 @@
         <option value="instructor">Instructor</option>
         <option value="administrativo">Administrativo</option>
       </select>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#crearUsuarioModal">Crear Usuario</button>
+      <button class="btn btn-primary">Crear Usuario</button>
     </div>
   </div>
-
-  <!-- boton Crear Usuario -->
-<div class="modal fade" id="crearUsuarioModal" tabindex="-1" aria-labelledby="crearUsuarioModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header" style="background-color: #39A900; color: white;">
-        <h5 class="modal-title" id="crearUsuarioModalLabel">Crear Nuevo Usuario</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form method="POST" action="{% url 'crear_usuario' %}" id="formCrearUsuario">
-          {% csrf_token %}
-          
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="nombre" class="form-label">Nombre Completo *</label>
-              <input type="text" class="form-control" id="nombre" name="nombre" required>
-            </div>
-            <div class="col-md-6">
-              <label for="email" class="form-label">Email *</label>
-              <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="rol" class="form-label">Rol *</label>
-              <select class="form-select" id="rol" name="rol" required>
-                <option value="">Seleccionar rol...</option>
-                <option value="aprendiz">Aprendiz</option>
-                <option value="instructor">Instructor</option>
-                <option value="administrativo">Administrativo</option>
-              </select>
-            </div>
-          </div>
-
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" form="formCrearUsuario" class="btn btn-primary">Crear Usuario</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!---- termina ------>
-
 
   <div class="table-responsive">
     <table class="table table-hover table-striped">

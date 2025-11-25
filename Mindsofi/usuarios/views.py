@@ -1,6 +1,4 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from .models import Programa
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -433,69 +431,6 @@ def admin_ficha_editar_view(request, ficha_id):
         'jornadas': ['Diurna', 'Nocturna', 'Mixta', 'Fines de semana']
     }
     return render(request, 'usuarios/admin/admin_ficha_editar.html', context)
-
-# --Boton admin usuario--
-
-def crear_usuario(request):
-    if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        email = request.POST.get('email')
-        rol = request.POST.get('rol')
-
-
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'El email ya está registrado')
-            return redirect('admin_usuarios')
-        
-        try:
-            # Crear el usuario
-            user = User.objects.create_user(
-                username=email,
-                email=email,
-                first_name=nombre
-            )
-            
-            messages.success(request, f'Usuario {nombre} creado exitosamente')
-            return redirect('admin_usuarios')
-            
-        except Exception as e:
-            messages.error(request, f'Error al crear usuario: {str(e)}')
-            return redirect('admin_usuarios')
-    
-    return redirect('admin_usuarios')
-
-
-#-- boton admin programa ----
-
-def crear_programa(request):
-    if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        codigo = request.POST.get('codigo')
-        nivel = request.POST.get('nivel')
-        duracion_meses = request.POST.get('duracion_meses')
-        
-        
-        if Programa.objects.filter(codigo=codigo).exists():
-            messages.error(request, 'El código del programa ya existe')
-            return redirect('admin_programas')
-        
-        try:
-            Programa.objects.create(
-                nombre=nombre,
-                codigo=codigo,
-                nivel=nivel,
-                duracion_meses=duracion_meses
-            )
-            messages.success(request, f'Programa {nombre} creado exitosamente')
-        except Exception as e:
-            messages.error(request, f'Error al crear programa: {str(e)}')
-        
-        return redirect('admin_programas')
-    
-    return redirect('admin_programas')
-
-
-
 
 
 # --- Vistas para el Panel del Instructor ---

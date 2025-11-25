@@ -1,3 +1,4 @@
+create database mindsofi;
 use mindsofi;
 
 
@@ -199,7 +200,16 @@ create table Horario (
     foreign key (idSalon) references Salon(id)
 );
 
+DROP TABLE Horario;
 
+
+
+select * from Vista_Horario;
+
+
+drop database mindsofi;
+
+TRUNCATE TABLE horario;
 
 
 
