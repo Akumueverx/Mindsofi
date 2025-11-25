@@ -1,7 +1,6 @@
 
 Mindsodfi - Clean project
-- Superuser created: admin / waza
-- Test aprendiz: migue2 / waza1234
-- Test instructor: instructor / waza1234
+- Superuser created: admin / AdminPass123
+- Test aprendiz: aprendiz1 / AprendizPass1
 Run:
     python manage.py runserver
