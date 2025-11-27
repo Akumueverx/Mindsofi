@@ -62,4 +62,9 @@ urlpatterns = [
     path("dashboard/admin/fichas/<int:ficha_id>/gestionar-aprendices/", views.admin_ficha_gestionar_aprendices_view, name="admin_ficha_gestionar_aprendices"),
     path("dashboard/admin/fichas/<int:ficha_id>/agregar-aprendiz/<int:usuario_id>/", views.admin_ficha_agregar_aprendiz_view, name="admin_ficha_agregar_aprendiz"),
     path("dashboard/admin/fichas/<int:ficha_id>/remover-aprendiz/<int:usuario_id>/", views.admin_ficha_remover_aprendiz_view, name="admin_ficha_remover_aprendiz"),
+
+    # URL para la ubicación en el panel de Admin
+    path("dashboard/admin/ubicacion/", views.admin_ubicacion_view, name="admin_ubicacion"),
+    path("dashboard/aprendiz/ubicacion/", views.aprendiz_ubicacion_view, name="aprendiz_ubicacion"),
 ]
+

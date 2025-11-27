@@ -37,27 +37,32 @@
     <ul class="nav nav-pills flex-column mb-auto">
       <li class="nav-item">
         <a href="/admin/" class="nav-link" target="_blank">
-          <i class="bi bi-box-arrow-up-right me-2"></i> ⚙️ Gestionar Sitio
+          <i class="bi bi-box-arrow-up-right me-2"></i>  Gestionar Sitio
         </a>
       </li>
       <li>
         <a href="{% url 'admin_usuarios' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_usuarios' %}active{% endif %}">
-          <i class="bi bi-people-fill me-2"></i> 👥 Gestión de Usuarios
+          <i class="bi bi-people-fill me-2"></i>  Gestión de Usuarios
         </a>
       </li>
       <li>
         <a href="{% url 'admin_programas' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_programas' %}active{% endif %}">
-          <i class="bi bi-journal-album me-2"></i> 📘 Gestión de Programas
+          <i class="bi bi-journal-album me-2"></i> Gestión de Programas
         </a>
       </li>
       <li>
         <a href="{% url 'admin_fichas' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_fichas' %}active{% endif %}">
-          <i class="bi bi-card-list me-2"></i> 📝 Gestión de Fichas
+          <i class="bi bi-card-list me-2"></i>  Gestión de Fichas
         </a>
       </li>
       <li>
         <a href="{% url 'admin_reportes' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_reportes' %}active{% endif %}">
-          <i class="bi bi-graph-up me-2"></i> 📊 Reportes Generales
+          <i class="bi bi-graph-up me-2"></i>  Reportes Generales
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_ubicacion' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_ubicacion' %}active{% endif %}">
+          <i class="bi bi-geo-alt-fill me-2"></i>  Ubicación
         </a>
       </li>
     </ul>

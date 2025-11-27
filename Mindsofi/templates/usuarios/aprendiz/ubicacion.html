@@ -1,0 +1,113 @@
+{% extends "usuarios/aprendiz/aprendiz_base.html" %}
+{% load static %}
+{% block title %}PISO 1 | MindSofi{% endblock %}
+
+{% block aprendiz_content %}
+
+<style>
+
+    .plano-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .punto-origen {
+        position: absolute;
+        font-size: 28px;
+        cursor: pointer;
+        transform: translate(-50%, -50%);
+    }
+
+    .usuario-icon {
+        position: absolute;
+        font-size: 40px;
+        transform: translate(-50%, -50%);
+    }
+
+    .ruta {
+        stroke: blue;
+        stroke-width: 5;
+        fill: none;
+        stroke-linecap: round;
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        animation: draw 2s ease forwards;
+    }
+
+    @keyframes draw {
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    .boton-destino {
+        background: #39A900;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+    }
+
+</style>
+
+<h1>Plano Piso 1</h1>
+
+<section style="display: flex; flex-direction: row;">
+
+    <!-- PLANO -->
+    <aside style="flex: 1;">
+        <div class="plano-container">
+            <img src="{% static 'planos/piso_1.png' %}" alt="Plano Piso 1">
+
+            <!-- MARCAR PUNTOS COMO ORÍGENES -->
+            {% for id, p in puntos.items %}
+                <a href="?origen={{ id }}"
+                   class="punto-origen"
+                   style="left: {{ p.left }}px; top: {{ p.top }}px;">
+                    📍
+                </a>
+            {% endfor %}
+
+            <!-- MOSTRAR UBICACIÓN 🚹 -->
+            {% if origen %}
+                <span class="usuario-icon"
+                    style="left: {{ origen.left }}px; top: {{ origen.top }}px;">
+                    🚹
+                </span>
+            {% endif %}
+
+            <!-- DIBUJAR LA RUTA -->
+            {% if ruta %}
+                <svg width="563" height="413" style="position:absolute; left:0; top:0;">
+                    <polyline class="ruta" points="{{ ruta }}"></polyline>
+                </svg>
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- PANEL DERECHO -->
+    <aside style="flex: 0 0 250px; padding-left: 20px; border-left: 2px solid #ddd;">
+        <h2>Seleccione destino</h2>
+
+        {% if not origen %}
+            <p><strong>Primero selecciona un punto en el mapa.</strong></p>
+        {% endif %}
+
+        {% for id, p in puntos.items %}
+            <form method="get" style="margin-bottom: 10px;">
+                {% if origen %}
+                    <input type="hidden" name="origen" value="{{ origen_id }}">
+                {% endif %}
+                <button class="boton-destino" type="submit" name="destino" value="{{ id }}">
+                    Ir a {{ p.nombre }}
+                </button>
+            </form>
+        {% endfor %}
+    </aside>
+
+</section>
+
+{% endblock %}

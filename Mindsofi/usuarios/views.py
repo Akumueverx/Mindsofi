@@ -151,23 +151,36 @@ def aprendiz_horario_view(request):
 @login_required
 @role_required(allowed_roles=['aprendiz'])
 def aprendiz_ubicacion_view(request):
-    """
-    Vista para mostrar la ubicación simulada del aprendiz en un plano.
-    """
-    # Coordenadas GPS de prueba (porcentaje de la pantalla)
-    # En un caso real, esto vendría de un API o un dispositivo.
-    posicion_gps = {'x': 25, 'y': 40}  # Ejemplo: 25% desde la izquierda, 40% desde arriba
+    # PUNTOS QUE EL USUARIO PUEDE ELEGIR
+    puntos = {
+        "Cupobart":     {"nombre": "Cupobart", "left": 300, "top": 200},
+        "Area_Oficina":  {"nombre": "Area de Oficina", "left": 490, "top": 150},
+        "aula":            {"nombre": "Aula", "left": 290, "top": 150},
+        "Enfermeria":          {"nombre": "Enfermeria", "left": 450, "top": 320},
+        "Zona_receso":        {"nombre": "Zona_receso", "left": 380, "top": 310},
+        "banos":           {"nombre": "Baños", "left": 200, "top": 200},
+        "Zona_deportiva":      {"nombre": "Zona Deportiva", "left": 120, "top": 150},
+    }
 
-    ambientes_con_display = []
-    # Pre-procesar nombres para la plantilla y evitar el filtro 'split'
-    for ambiente in AMBIENTES_MAPA:
-        ambientes_con_display.append({**ambiente, 'nombre_display': ambiente['nombre'].split('(')[0].strip()})
+    origen_id = request.GET.get("origen")
+    destino_id = request.GET.get("destino")
+
+    origen = puntos.get(origen_id)
+    destino = puntos.get(destino_id)
+
+    # GENERAR RUTA AUTOMÁTICA
+    ruta = None
+    if origen and destino:
+        ruta = f"{origen['left']},{origen['top']} {destino['left']},{destino['top']}"
 
     context = {
-        'posicion': posicion_gps,
-        'ambientes': ambientes_con_display,
+        "puntos": puntos,
+        "origen": origen,
+        "origen_id": origen_id,
+        "ruta": ruta,
     }
-    return render(request, 'usuarios/aprendiz/calificaciones.html', context)
+
+    return render(request, "usuarios/aprendiz/ubicacion.html", context)
 
 @login_required
 @role_required(allowed_roles=['aprendiz'])
@@ -533,6 +546,55 @@ def admin_ficha_editar_view(request, ficha_id):
     return render(request, 'usuarios/admin/admin_ficha_form.html', context)
 
 
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
+def admin_ubicacion_view(request):
+
+    # PUNTOS QUE EL USUARIO PUEDE ELEGIR
+    puntos = {
+        "Cupobart":     {"nombre": "Cupobart", "left": 300, "top": 200},
+        "Area_Oficina":  {"nombre": "Area de Oficina", "left": 490, "top": 150},
+        "aula":            {"nombre": "Aula", "left": 290, "top": 150},
+        "Enfermeria":          {"nombre": "Enfermeria", "left": 450, "top": 320},
+        "Zona_receso":        {"nombre": "Zona_receso", "left": 380, "top": 310},
+        "banos":           {"nombre": "Baños", "left": 200, "top": 200},
+        "Zona_deportiva":      {"nombre": "Zona Deportiva", "left": 120, "top": 150},
+    }
+
+    origen_id = request.GET.get("origen")
+    destino_id = request.GET.get("destino")
+
+    origen = puntos.get(origen_id)
+    destino = puntos.get(destino_id)
+
+    # GENERAR RUTA AUTOMÁTICA
+    ruta = None
+    if origen and destino:
+        ruta = f"{origen['left']},{origen['top']} {destino['left']},{destino['top']}"
+
+    context = {
+        "puntos": puntos,
+        "origen": origen,
+        "origen_id": origen_id,
+        "ruta": ruta,
+    }
+
+    return render(request, "usuarios/admin/admin_ubicacion.html", context)
+@login_required
+def admin_mapa_view(request):
+
+    ambientes = [
+        {'id': '301', 'nombre': 'Aula 301', 'top': 20, 'left': 50},
+        {'id': '302', 'nombre': 'Aula 302', 'top': 35, 'left': 60},
+        {'id': 'cafeteria', 'nombre': 'Cafetería', 'top': 70, 'left': 40},
+    ]
+
+    return render(request, "usuarios/admin/admin_mapa_2d.html", {
+        'ambientes': ambientes
+    })
+
+
 # --- Vistas para el Panel del Instructor ---
 @login_required
 @role_required(allowed_roles=['instructor', 'administrativo'])
@@ -550,24 +612,37 @@ def instructor_fichas_view(request):
 @login_required
 @role_required(allowed_roles=['instructor', 'administrativo'])
 def instructor_ubicacion_view(request):
-    """
-    Vista para mostrar la ubicación simulada del instructor en un plano.
-    """
-    # Coordenadas GPS de prueba (porcentaje de la pantalla)
-    # En un caso real, esto vendría de un API o un dispositivo.
-    posicion_gps = {'x': 70, 'y': 85}  # Ejemplo: 70% desde la izquierda, 85% desde arriba
 
-    ambientes_con_display = []
+    # PUNTOS QUE EL USUARIO PUEDE ELEGIR
+    puntos = {
+        "Cupobart":     {"nombre": "Cupobart", "left": 300, "top": 200},
+        "Area_Oficina":  {"nombre": "Area de Oficina", "left": 490, "top": 150},
+        "aula":            {"nombre": "Aula", "left": 290, "top": 150},
+        "Enfermeria":          {"nombre": "Enfermeria", "left": 450, "top": 320},
+        "Zona_receso":        {"nombre": "Zona_receso", "left": 380, "top": 310},
+        "banos":           {"nombre": "Baños", "left": 200, "top": 200},
+        "Zona_deportiva":      {"nombre": "Zona Deportiva", "left": 120, "top": 150},
+    }
 
-    # Pre-procesar nombres para la plantilla y evitar el filtro 'split'
-    for ambiente in AMBIENTES_MAPA:
-        ambientes_con_display.append({**ambiente, 'nombre_display': ambiente['nombre'].split('(')[0].strip()})
+    origen_id = request.GET.get("origen")
+    destino_id = request.GET.get("destino")
+
+    origen = puntos.get(origen_id)
+    destino = puntos.get(destino_id)
+
+    # GENERAR RUTA AUTOMÁTICA
+    ruta = None
+    if origen and destino:
+        ruta = f"{origen['left']},{origen['top']} {destino['left']},{destino['top']}"
 
     context = {
-        'posicion': posicion_gps,
-        'ambientes': ambientes_con_display,
+        "puntos": puntos,
+        "origen": origen,
+        "origen_id": origen_id,
+        "ruta": ruta,
     }
-    return render(request, 'usuarios/instructor/instructor_ubicacion.html', context)
+
+    return render(request, "usuarios/instructor/instructor_ubicacion.html", context)
 
 @login_required
 @role_required(allowed_roles=['instructor', 'administrativo'])
@@ -738,3 +813,35 @@ def instructor_aprendiz_perfil_view(request, ficha_id, aprendiz_id):
         'competencias_programa': competencias_programa,
     }
     return render(request, 'usuarios/instructor/instructor_aprendiz_perfil.html', context)
+
+
+def ubicacion_views(request):
+
+    puntos = {
+        "zona_receso": {"nombre": "Zona de Receso", "left": 300, "top": 200},
+        "zona_deportiva": {"nombre": "Zona Deportiva", "left": 400, "top": 350},
+        "aula": {"nombre": "Aula", "left": 200, "top": 150},
+        "salon1": {"nombre": "Salón 1", "left": 450, "top": 320},
+        "cupobart": {"nombre": "Cupobart", "left": 380, "top": 310},
+        "banios": {"nombre": "Baños", "left": 230, "top": 300},
+        "enfermeria": {"nombre": "Enfermería", "left": 150, "top": 260},
+    }
+
+    origen_id = request.GET.get("origen")
+    destino_id = request.GET.get("destino")
+
+    origen = puntos.get(origen_id)
+    destino = puntos.get(destino_id)
+
+    ruta = None
+
+    # Crear puntos de la línea de ruta si origen y destino existen
+    if origen and destino:
+        ruta = f"{origen['left']},{origen['top']} {destino['left']},{destino['top']}"
+
+    return render(request, "aprendiz/ubicacion_aprendiz.html", {
+        "puntos": puntos,
+        "origen": origen,
+        "origen_id": origen_id,
+        "ruta": ruta
+    })
