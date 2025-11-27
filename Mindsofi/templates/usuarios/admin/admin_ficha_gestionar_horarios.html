@@ -1,0 +1,59 @@
+{% extends "usuarios/admin/dashboard.html" %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">{{ titulo }}</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard_admin' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'admin_fichas' %}">Gestión de Fichas</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'admin_ficha_editar' ficha_id=ficha.id %}">Editar Ficha #{{ ficha.numero }}</a></li>
+        <li class="breadcrumb-item active">Gestionar Horarios</li>
+    </ol>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-calendar-alt me-1"></i>
+                Horarios de la Ficha
+            </div>
+            <div class="card-body">
+                {{ formset.management_form }}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Día</th>
+                                <th>Hora Inicio</th>
+                                <th>Hora Fin</th>
+                                <th>Instructor</th>
+                                <th>Competencia</th>
+                                <th>Ambiente</th>
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for horario_form in formset %}
+                                <tr>
+                                    {% for field in horario_form.hidden_fields %}{{ field }}{% endfor %}
+                                    <td>{{ horario_form.dia }}</td>
+                                    <td>{{ horario_form.hora_inicio }}</td>
+                                    <td>{{ horario_form.hora_fin }}</td>
+                                    <td>{{ horario_form.instructor }}</td>
+                                    <td>{{ horario_form.competencia }}</td>
+                                    <td>{{ horario_form.ambiente }}</td>
+                                    <td>{% if horario_form.instance.pk %}{{ horario_form.DELETE }}{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Horarios</button>
+        <a href="{% url 'admin_ficha_editar' ficha_id=ficha.id %}" class="btn btn-secondary">Volver a la Ficha</a>
+    </form>
+</div>
+{% endblock %}

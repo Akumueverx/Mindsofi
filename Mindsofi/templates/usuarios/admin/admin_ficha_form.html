@@ -1,23 +1,38 @@
-{% extends "usuarios/admin/admin_base.html" %}
+{% extends "usuarios/admin/dashboard.html" %} {# Usamos la base que ya funciona #}
+
 {% block title %}{{ titulo }}{% endblock %}
 
-{% block admin_content %}
-<div class="card p-4 shadow-sm">
-  <h5 class="mb-4">{{ titulo }}</h5>
+{% block admin_content %} {# El bloque de contenido de tu dashboard de admin #}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">{{ titulo }}</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard_admin' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'admin_fichas' %}">Gestión de Fichas</a></li>
+        <li class="breadcrumb-item active">{{ titulo }}</li>
+    </ol>
 
-  <form method="post">
-    {% csrf_token %}
-    
-    {% for field in form %}
-      <div class="mb-3">
-        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-        {{ field }}
-        {% if field.errors %}<div class="invalid-feedback d-block">{{ field.errors.0 }}</div>{% endif %}
-      </div>
-    {% endfor %}
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-info-circle me-1"></i>
+                Datos de la Ficha
+            </div>
+            <div class="card-body">
+                {{ form.as_p }}
+            </div>
+        </div>
 
-    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-    <a href="{% url 'admin_fichas' %}" class="btn btn-secondary">Cancelar</a>
-  </form>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <a href="{% url 'admin_fichas' %}" class="btn btn-secondary">Cancelar</a>
+        
+        {# EL JODIDO BOTÓN: Solo aparece si estamos editando una ficha existente #}
+        {% if form.instance.pk %}
+            <a href="{% url 'admin_ficha_gestionar_horarios' ficha_id=form.instance.pk %}" class="btn btn-info float-end">
+                <i class="fas fa-calendar-alt me-1"></i> Gestionar Horarios
+            </a>
+        {% endif %}
+    </form>
 </div>
 {% endblock %}
