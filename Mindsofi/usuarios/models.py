@@ -16,9 +16,38 @@ class Ficha(models.Model):
     fecha_inicio = models.DateField(null=True, blank=True)
     fecha_fin = models.DateField(null=True, blank=True)
     cupo_maximo = models.PositiveIntegerField(default=30, help_text="Número máximo de aprendices en la ficha.")
+    instructor = models.ForeignKey(
+        'Usuario',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='fichas_asignadas',
+        limit_choices_to={'rol': 'instructor'}
+    )
 
     def __str__(self):
         return f"{self.numero} - {self.programa.nombre}"
+
+class Horario(models.Model):
+    DIA_CHOICES = [
+        ('Lunes', 'Lunes'),
+        ('Martes', 'Martes'),
+        ('Miércoles', 'Miércoles'),
+        ('Jueves', 'Jueves'),
+        ('Viernes', 'Viernes'),
+        ('Sábado', 'Sábado'),
+    ]
+    ficha = models.ForeignKey(Ficha, on_delete=models.CASCADE, related_name='horarios')
+    instructor = models.ForeignKey('Usuario', on_delete=models.CASCADE, related_name='clases', limit_choices_to={'rol': 'instructor'})
+    competencia = models.CharField(max_length=200, help_text="Ej: Diseño de Interfaces, Desarrollo Front-End, etc.")
+    dia = models.CharField(max_length=10, choices=DIA_CHOICES)
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+    ambiente = models.CharField(max_length=100, help_text="Ej: Ambiente 301, Auditorio, etc.")
+
+    class Meta:
+        ordering = ['dia', 'hora_inicio']
+        verbose_name_plural = "Horarios"
 
 class Reporte(models.Model):
     TIPO_REPORTE_CHOICES = [

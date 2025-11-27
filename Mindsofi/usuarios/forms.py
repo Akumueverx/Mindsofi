@@ -1,7 +1,7 @@
 # usuarios/forms.py
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import Usuario, Ficha, Programa, Reporte
+from .models import Usuario, Ficha, Programa, Reporte, Horario
 
 
 class UsuarioCreationForm(UserCreationForm):
@@ -53,7 +53,7 @@ class UsuarioCreationForm(UserCreationForm):
 class FichaForm(forms.ModelForm):
     class Meta:
         model = Ficha
-        fields = ['numero', 'programa', 'jornada', 'fecha_inicio', 'fecha_fin', 'cupo_maximo']
+        fields = ['numero', 'programa', 'jornada', 'instructor', 'fecha_inicio', 'fecha_fin', 'cupo_maximo']
         widgets = {
             'fecha_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'fecha_fin': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -63,8 +63,26 @@ class FichaForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['numero'].widget.attrs.update({'class': 'form-control'})
         self.fields['programa'].widget.attrs.update({'class': 'form-select'})
+        self.fields['instructor'].widget.attrs.update({'class': 'form-select'})
         self.fields['jornada'].widget.attrs.update({'class': 'form-select'})
         self.fields['cupo_maximo'].widget.attrs.update({'class': 'form-control', 'type': 'number', 'min': '1'})
+
+class HorarioForm(forms.ModelForm):
+    class Meta:
+        model = Horario
+        fields = ['dia', 'hora_inicio', 'hora_fin', 'instructor', 'competencia', 'ambiente']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['dia'].widget.attrs.update({'class': 'form-select'})
+        self.fields['hora_inicio'].widget.attrs.update({'class': 'form-control', 'type': 'time'})
+        self.fields['hora_fin'].widget.attrs.update({'class': 'form-control', 'type': 'time'})
+        self.fields['instructor'].widget.attrs.update({'class': 'form-select'})
+        self.fields['competencia'].widget.attrs.update({'class': 'form-control'})
+        self.fields['ambiente'].widget.attrs.update({'class': 'form-control'})
+        # Hacemos que el instructor no sea obligatorio en el formulario inline,
+        # ya que puede ser el instructor principal de la ficha.
+        self.fields['instructor'].required = False
 
 class ProgramaForm(forms.ModelForm):
     class Meta:

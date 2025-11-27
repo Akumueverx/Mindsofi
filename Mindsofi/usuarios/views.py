@@ -4,7 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from .forms import UsuarioCreationForm, CustomAuthenticationForm, FichaForm, ProgramaForm, UsuarioAdminForm, ReporteForm
-from .models import Usuario, Ficha, Programa, Reporte
+from .forms import UsuarioCreationForm, CustomAuthenticationForm, FichaForm, ProgramaForm, UsuarioAdminForm, ReporteForm, HorarioForm
+from .models import Usuario, Ficha, Programa, Reporte, Horario, models
+from django.forms import inlineformset_factory
 from .decorators import role_required
 
 # Constante para los ambientes del mapa para reducir la duplicación de código
@@ -515,20 +517,52 @@ def admin_programa_editar_view(request, programa_id):
 
 @login_required
 @role_required(allowed_roles=['administrativo'])
+def admin_ficha_gestionar_horarios_view(request, ficha_id):
+    ficha = get_object_or_404(Ficha, id=ficha_id)
+    HorarioFormSet = inlineformset_factory(Ficha, Horario, form=HorarioForm, extra=1, can_delete=True)
+
+    if request.method == 'POST':
+        formset = HorarioFormSet(request.POST, instance=ficha)
+        if formset.is_valid():
+            formset.save()
+            messages.success(request, f"Horarios para la ficha #{ficha.numero} actualizados correctamente.")
+            return redirect('admin_ficha_gestionar_horarios', ficha_id=ficha.id)
+    else:
+        formset = HorarioFormSet(instance=ficha)
+
+    context = {
+        'formset': formset,
+        'ficha': ficha,
+        'titulo': f'Gestionar Horarios de la Ficha #{ficha.numero}'
+    }
+    return render(request, 'usuarios/admin/admin_ficha_gestionar_horarios.html', context)
+
+@login_required
+@role_required(allowed_roles=['administrativo'])
 def admin_ficha_editar_view(request, ficha_id):
-    ficha = Ficha.objects.get(id=ficha_id)
+    ficha = get_object_or_404(Ficha, id=ficha_id)
+    
+    # Creamos un formset para los horarios relacionados con esta ficha
+    HorarioFormSet = inlineformset_factory(Ficha, Horario, form=HorarioForm, extra=1, can_delete=True)
+
     if request.method == 'POST':
         form = FichaForm(request.POST, instance=ficha)
-        if form.is_valid():
+        formset = HorarioFormSet(request.POST, instance=ficha, prefix='horarios')
+
+        if form.is_valid() and formset.is_valid():
             form.save()
+            formset.save()
             messages.success(request, f"Ficha #{ficha.numero} actualizada correctamente.")
             return redirect('admin_fichas')
     else:
         form = FichaForm(instance=ficha)
+        formset = HorarioFormSet(instance=ficha, prefix='horarios')
 
     context = {
         'form': form,
-        'titulo': f'Editar Ficha #{ficha.numero}'
+        'formset': formset,
+        'titulo': f'Editar Ficha #{ficha.numero}',
+        'ficha': ficha, # Pasamos la ficha para el título y otros datos
     }
     return render(request, 'usuarios/admin/admin_ficha_form.html', context)
 
@@ -537,13 +571,11 @@ def admin_ficha_editar_view(request, ficha_id):
 @login_required
 @role_required(allowed_roles=['instructor', 'administrativo'])
 def instructor_fichas_view(request):
-    # TODO: Reemplazar con la lógica real para obtener las fichas del instructor
-    fichas_ejemplo = [
-        {'id': 1, 'numero': '2556678', 'programa': 'Análisis y Desarrollo de Software'},
-        {'id': 2, 'numero': '2558341', 'programa': 'Producción Multimedia', 'jornada': 'Diurna', 'aprendices_count': 25},
-    ]
+    # Obtenemos las fichas asignadas al instructor que ha iniciado sesión.
+    # Usamos select_related para optimizar la consulta a la base de datos.
+    fichas_asignadas = Ficha.objects.filter(instructor=request.user).select_related('programa')
     context = {
-        'fichas': fichas_ejemplo
+        'fichas': fichas_asignadas
     }
     return render(request, 'usuarios/instructor/instructor_fichas.html', context)
 
@@ -572,22 +604,22 @@ def instructor_ubicacion_view(request):
 @login_required
 @role_required(allowed_roles=['instructor', 'administrativo'])
 def instructor_horarios_view(request):
-    # TODO: Reemplazar con la lógica real para obtener los horarios del instructor desde la BD
-    horarios_ejemplo = [
-        {'id': 1, 'ficha_numero': '2556678', 'programa': 'Análisis y Desarrollo de Software', 'competencia': 'Diseño de Interfaces', 'dia': 'Lunes', 'hora_inicio': '08:00', 'hora_fin': '12:00', 'ambiente': 'Ambiente 301'},
-        {'id': 2, 'ficha_numero': '2558341', 'programa': 'Producción Multimedia', 'competencia': 'Modelado 3D', 'dia': 'Martes', 'hora_inicio': '14:00', 'hora_fin': '18:00', 'ambiente': 'Ambiente 205'},
-        {'id': 3, 'ficha_numero': '2556678', 'programa': 'Análisis y Desarrollo de Software', 'competencia': 'Bases de Datos', 'dia': 'Miércoles', 'hora_inicio': '10:00', 'hora_fin': '14:00', 'ambiente': 'Ambiente 301'},
-        {'id': 4, 'ficha_numero': '2558341', 'programa': 'Producción Multimedia', 'competencia': 'Edición de Video', 'dia': 'Jueves', 'hora_inicio': '08:00', 'hora_fin': '12:00', 'ambiente': 'Estudio de Grabación'},
-        {'id': 5, 'ficha_numero': '2556678', 'programa': 'Análisis y Desarrollo de Software', 'competencia': 'Desarrollo Front-End', 'dia': 'Lunes', 'hora_inicio': '13:00', 'hora_fin': '17:00', 'ambiente': 'Ambiente 302'},
-    ]
+    # Obtenemos las fichas que el instructor tiene asignadas como principal.
+    fichas_asignadas = Ficha.objects.filter(instructor=request.user)
+    
+    # Buscamos todas las entradas de horario que correspondan a esas fichas.
+    # También incluimos las clases que el instructor da, incluso si no es el instructor principal de la ficha.
+    horarios_instructor = Horario.objects.filter(
+        models.Q(ficha__in=fichas_asignadas) | models.Q(instructor=request.user)
+    ).select_related('ficha', 'ficha__programa', 'instructor').distinct()
 
     # Agrupar horarios por día para la vista de calendario
     horarios_por_dia = {}
     dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
     for dia in dias_semana:
         horarios_por_dia[dia] = sorted(
-            [h for h in horarios_ejemplo if h['dia'] == dia], 
-            key=lambda x: x['hora_inicio']
+            [h for h in horarios_instructor if h.dia == dia], 
+            key=lambda x: x.hora_inicio
         )
 
     context = {
@@ -660,22 +692,15 @@ def instructor_reporte_crear_view(request):
 @login_required
 @role_required(allowed_roles=['instructor', 'administrativo'])
 def instructor_ficha_aprendices_view(request, ficha_id):
-    # TODO: Reemplazar con la lógica real para obtener la ficha y sus aprendices
-    # ficha = get_object_or_404(Ficha, id=ficha_id)
-    # aprendices = Usuario.objects.filter(ficha=ficha, rol='aprendiz')
-
-    # Datos de ejemplo para la demostración
-    fichas_db = {1: {'id': 1, 'numero': '2556678', 'programa': 'Análisis y Desarrollo de Software'}, 2: {'id': 2, 'numero': '2558341', 'programa': 'Producción Multimedia'}}
-    ficha_ejemplo = fichas_db.get(ficha_id, {'id': ficha_id, 'numero': 'Desconocida', 'programa': ''})
-    aprendices_ejemplo = [
-        {'id': 101, 'nombre_completo': 'Ana María López', 'documento': '1029384756'},
-        {'id': 102, 'nombre_completo': 'Carlos Alberto Pérez', 'documento': '1098765432'},
-        {'id': 103, 'nombre_completo': 'Sofía Rodríguez Gómez', 'documento': '1012345678'},
-    ]
+    # Obtenemos la ficha real desde la base de datos
+    ficha = get_object_or_404(Ficha.objects.select_related('programa'), id=ficha_id)
+    
+    # Obtenemos los aprendices reales asignados a esa ficha
+    aprendices = Usuario.objects.filter(ficha=ficha, rol='aprendiz').order_by('last_name', 'first_name')
 
     context = {
-        'ficha': ficha_ejemplo,
-        'aprendices': aprendices_ejemplo
+        'ficha': ficha,
+        'aprendices': aprendices
     }
     return render(request, 'usuarios/instructor/instructor_ficha_aprendices.html', context)
 

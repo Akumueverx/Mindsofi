@@ -58,6 +58,7 @@ urlpatterns = [
     path("dashboard/admin/programas/<int:programa_id>/eliminar/", views.admin_programa_eliminar_view, name="admin_programa_eliminar"),
     path("dashboard/admin/fichas/<int:ficha_id>/editar/", views.admin_ficha_editar_view, name="admin_ficha_editar"),
     path("dashboard/admin/fichas/<int:ficha_id>/eliminar/", views.admin_ficha_eliminar_view, name="admin_ficha_eliminar"),
+    path("dashboard/admin/fichas/<int:ficha_id>/gestionar-horarios/", views.admin_ficha_gestionar_horarios_view, name="admin_ficha_gestionar_horarios"),
     # URLs para gestionar aprendices en una ficha
     path("dashboard/admin/fichas/<int:ficha_id>/gestionar-aprendices/", views.admin_ficha_gestionar_aprendices_view, name="admin_ficha_gestionar_aprendices"),
     path("dashboard/admin/fichas/<int:ficha_id>/agregar-aprendiz/<int:usuario_id>/", views.admin_ficha_agregar_aprendiz_view, name="admin_ficha_agregar_aprendiz"),
